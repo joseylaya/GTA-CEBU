@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#2ecc70",
+              "background-light": "#f6f8f7",
+              "background-dark": "#131f18",
+            },
+            fontFamily: {
+              "display": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<title>Tracker Detail - Chat</title>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+        .chat-container {
+            height: calc(100vh - 140px); /* Adjust based on sticky headers/footers */
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100">
+<div class="relative flex min-h-screen w-full flex-col max-w-md mx-auto bg-slate-50 dark:bg-background-dark shadow-xl overflow-x-hidden">
+<!-- Sticky Header with Balance -->
+<div class="sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center p-4">
+<div class="flex size-10 shrink-0 items-center justify-center cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+<span class="material-symbols-outlined text-slate-700 dark:text-slate-300">arrow_back</span>
+</div>
+<div class="flex-1 px-3">
+<h2 class="text-base font-bold leading-tight tracking-tight">Trip to Italy</h2>
+<p class="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Group Tracker</p>
+</div>
+<button class="flex size-10 cursor-pointer items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-slate-700 dark:text-slate-300">more_vert</span>
+</button>
+</div>
+<!-- Pinned Balance Section -->
+<div class="px-4 pb-4">
+<div class="flex items-center justify-between bg-primary/5 dark:bg-primary/10 rounded-2xl p-4 border border-primary/20">
+<div>
+<p class="text-[10px] font-bold text-primary uppercase tracking-wider mb-1">Overall Balance</p>
+<p class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">$450.00 <span class="text-sm font-medium text-slate-500 dark:text-slate-400">owed</span></p>
+</div>
+<button class="bg-primary text-slate-900 px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm hover:brightness-105 active:scale-95 transition-all">
+                        Settle up
+                    </button>
+</div>
+</div>
+</div>
+<!-- Chat Content Area -->
+<div class="flex-1 overflow-y-auto px-4 py-6 flex flex-col gap-8 scrollbar-hide">
+<div class="text-center">
+<span class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest bg-slate-100 dark:bg-slate-800/50 px-3 py-1 rounded-full">Thursday, Oct 24</span>
+</div>
+<!-- Chat Entry: Others (Alex M) -->
+<div class="flex flex-col gap-2">
+<div class="flex items-end gap-3 max-w-[85%]">
+<div class="size-9 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-sm border-2 border-white dark:border-slate-800">
+                        AM
+                    </div>
+<div class="flex flex-col gap-1">
+<span class="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">Alex M.</span>
+<div class="bg-white dark:bg-slate-800 p-4 rounded-2xl rounded-bl-none shadow-sm border border-slate-100 dark:border-slate-700">
+<div class="flex items-center gap-3 mb-2">
+<div class="size-10 rounded-lg bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">restaurant</span>
+</div>
+<div>
+<p class="text-sm font-bold text-slate-900 dark:text-white">Dinner at Lucca's</p>
+<p class="text-xs text-primary font-bold">Paid $12.50 for you</p>
+</div>
+</div>
+<p class="text-xs text-slate-500 dark:text-slate-400">"That pasta was amazing, guys!"</p>
+</div>
+</div>
+</div>
+<!-- Nested Replies -->
+<div class="ml-12 flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<div class="size-6 rounded-full bg-orange-400 flex items-center justify-center text-[10px] text-white font-bold shrink-0">SK</div>
+<div class="bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-full text-xs text-slate-700 dark:text-slate-300">
+                            Totally! 🍝
+                        </div>
+</div>
+</div>
+</div>
+<!-- Chat Entry: Me -->
+<div class="flex flex-col gap-2 items-end">
+<div class="flex items-end gap-3 max-w-[85%] flex-row-reverse">
+<div class="size-9 rounded-full bg-primary flex items-center justify-center text-slate-900 text-xs font-bold shrink-0 shadow-sm border-2 border-white dark:border-slate-800">
+                        YOU
+                    </div>
+<div class="flex flex-col gap-1 items-end">
+<span class="text-xs font-bold text-slate-500 dark:text-slate-400 mr-1">You</span>
+<div class="bg-primary text-slate-900 p-4 rounded-2xl rounded-br-none shadow-sm">
+<div class="flex items-center gap-3 mb-1">
+<div class="size-10 rounded-lg bg-white/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-900">shopping_cart</span>
+</div>
+<div>
+<p class="text-sm font-bold">Weekly Groceries</p>
+<p class="text-xs font-bold opacity-80">You paid $45.20</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<span class="text-[10px] text-slate-400 mr-12 uppercase font-bold">Oct 22, 11:45 AM</span>
+</div>
+<!-- Chat Entry: Others (Sarah K) -->
+<div class="flex flex-col gap-2">
+<div class="flex items-end gap-3 max-w-[85%]">
+<div class="size-9 rounded-full bg-orange-400 flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-sm border-2 border-white dark:border-slate-800">
+                        SK
+                    </div>
+<div class="flex flex-col gap-1">
+<span class="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">Sarah K.</span>
+<div class="bg-white dark:bg-slate-800 p-4 rounded-2xl rounded-bl-none shadow-sm border border-slate-100 dark:border-slate-700">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+<span class="material-symbols-outlined text-blue-600 dark:text-blue-400">local_gas_station</span>
+</div>
+<div>
+<p class="text-sm font-bold text-slate-900 dark:text-white">Gas for Roadtrip</p>
+<p class="text-xs text-primary font-bold">Paid $32.00 for you</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Reply -->
+<div class="ml-12 flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<div class="size-6 rounded-full bg-blue-500 flex items-center justify-center text-[10px] text-white font-bold shrink-0">AM</div>
+<div class="bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-full text-xs text-slate-700 dark:text-slate-300">
+                            Thanks Sarah! Just sent my share.
+                        </div>
+</div>
+</div>
+</div>
+<!-- Chat Entry: Others (Alex M) -->
+<div class="flex flex-col gap-2">
+<div class="flex items-end gap-3 max-w-[85%]">
+<div class="size-9 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-sm border-2 border-white dark:border-slate-800">
+                        AM
+                    </div>
+<div class="flex flex-col gap-1">
+<span class="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">Alex M.</span>
+<div class="bg-white dark:bg-slate-800 p-4 rounded-2xl rounded-bl-none shadow-sm border border-slate-100 dark:border-slate-700">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+<span class="material-symbols-outlined text-purple-600 dark:text-purple-400">movie</span>
+</div>
+<div>
+<p class="text-sm font-bold text-slate-900 dark:text-white">Movie Tickets</p>
+<p class="text-xs text-primary font-bold">Paid $15.00 for you</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Chat Input Bar -->
+<div class="sticky bottom-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 p-4 pb-8 z-20">
+<div class="flex items-center gap-3">
+<button class="size-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition-colors">
+<span class="material-symbols-outlined">add</span>
+</button>
+<div class="flex-1 relative">
+<input class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary/50 dark:text-white" placeholder="Type a message or add expense..." type="text"/>
+</div>
+<button class="size-10 rounded-full bg-primary flex items-center justify-center text-slate-900 shadow-lg shadow-primary/20 hover:brightness-105 active:scale-90 transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">send</span>
+</button>
+</div>
+<!-- Contextual App Tabs (Minimal) -->
+<div class="flex justify-around mt-4">
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#"><span class="material-symbols-outlined text-[20px]">home</span></a>
+<a class="flex flex-col items-center gap-1 text-primary" href="#"><span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1">group</span></a>
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#"><span class="material-symbols-outlined text-[20px]">person</span></a>
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#"><span class="material-symbols-outlined text-[20px]">notifications</span></a>
+</div>
+</div>
+</div>
+</body></html>

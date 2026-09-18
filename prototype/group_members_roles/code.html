@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Group Members</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2ecc70",
+                        "background-light": "#f6f8f7",
+                        "background-dark": "#131f18",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "1rem",
+                        "2xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100">
+<div class="relative flex min-h-screen w-full flex-col bg-background-light dark:bg-background-dark max-w-md mx-auto shadow-2xl">
+<header class="sticky top-0 z-10 flex items-center bg-white dark:bg-slate-900 p-4 border-b border-slate-200 dark:border-slate-800 justify-between">
+<div class="flex items-center gap-3">
+<button class="flex size-10 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-slate-700 dark:text-slate-300">arrow_back</span>
+</button>
+<h2 class="text-lg font-bold leading-tight tracking-tight">Group Members</h2>
+</div>
+<div class="flex items-center">
+<button class="flex size-10 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-slate-700 dark:text-slate-300">search</span>
+</button>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto pb-24">
+<div class="p-6">
+<div class="flex items-center justify-between mb-6">
+<div>
+<h3 class="text-xs font-bold uppercase tracking-[0.1em] text-slate-400 dark:text-slate-500">The Crew</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400">4 people in this space</p>
+</div>
+<button class="flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-full font-bold text-sm hover:opacity-90 transition-all shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-lg">group_add</span>
+                        Add Someone
+                    </button>
+</div>
+<div class="space-y-3">
+<!-- Alex -->
+<div class="flex items-center gap-4 bg-white dark:bg-slate-900 p-4 rounded-2xl border border-transparent shadow-sm hover:shadow-md transition-all group">
+<div class="relative">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-14 w-14 border-2 border-primary/20 shadow-inner" data-alt="Alex Johnson" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCTGcOXjPjp46sj9kt-n2BBu_xV7SgRicmqjMwEICtOfLjDylNotQlhzmypTuRQxvGzJZMv6hyN3a-SzwhfK9OS9caFhCFwvUAngiWtUkJ0kU0dPr2IzXnMPEpSa_M9B5JMWXABIx3dptCQyoFM06wRfLjf4ztVf3H5eGGB9FjHZK9qlDk0rsfVqgw6d5BqniqcguYEoTxBhlnnqtAFT-v79-Dna09cjKmmOBnm0EAFZus7rUyfdpu8dWZL7pPxpVOfU3KwFmggHGM");'></div>
+<div class="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-primary border-2 border-white dark:border-slate-900"></div>
+</div>
+<div class="flex flex-1 flex-col justify-center">
+<p class="text-[17px] font-bold leading-none mb-1.5">Alex Johnson</p>
+<div class="flex items-center">
+<span class="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider">Group Owner</span>
+</div>
+</div>
+<div class="shrink-0">
+<span class="material-symbols-outlined text-slate-300 group-hover:text-primary transition-colors">more_vert</span>
+</div>
+</div>
+<!-- Sarah -->
+<div class="flex items-center gap-4 bg-white dark:bg-slate-900 p-4 rounded-2xl border border-transparent shadow-sm hover:shadow-md transition-all group">
+<div class="relative">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-14 w-14 border-2 border-purple-100 dark:border-purple-900 shadow-inner" data-alt="Sarah Miller" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDsaa0e7EZGUAPmyD3Fq3PWJVgmAEeGIBPOT5HNuHe7Ruj-Twb0-VkJLUckG0INKOgtiJ579ByRlUoCO43ChXOzqOFxqHgkYH92I7DsWPwCpikcY9E2JF7qya6MaC3t_38f1Op-FweO-fpg5DJRlZv2T1-yQ6r1a_oxeYE4EeOn-eOHxyGTKTuGST4-WSLX5ZkseuUWu9J6SuyoGfrQG8XjXy_2SB8zf3ytOEpzU2dM0wCBeq1DR_GpnNfQBTI5zz2PeXPLXLdA3z4");'></div>
+</div>
+<div class="flex flex-1 flex-col justify-center">
+<p class="text-[17px] font-bold leading-none mb-1.5">Sarah Miller</p>
+<div class="flex items-center">
+<span class="px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-[10px] font-bold uppercase tracking-wider">Editor</span>
+</div>
+</div>
+<div class="shrink-0">
+<span class="material-symbols-outlined text-slate-300 group-hover:text-primary transition-colors">more_vert</span>
+</div>
+</div>
+<!-- David -->
+<div class="flex items-center gap-4 bg-white dark:bg-slate-900 p-4 rounded-2xl border border-transparent shadow-sm hover:shadow-md transition-all group">
+<div class="relative">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-14 w-14 border-2 border-blue-100 dark:border-blue-900 shadow-inner" data-alt="David Chen" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAH6xgdLNhA9Hf7avBjxSATZI0dUlVztGq-IByWnA3ZnBZa9DnmzHV-uBKcCCRaL3_FYWrolQnxkUbNkOadv21RER-68l8PlfQU2FBaBc1NSHVHieHAFQYT2vMmwxQECBwKatKNo9h0FiSidb3lQDVijjjNr5uvmdTpFRjMFIChTNJ57tqPyNKMJxA0-ng1j-JJEU2OOt2HHT4SWpN1_GUR7fvGKcSRUpPi_-4xjRXpTcslkPqjTBf59H6-DDTJQ7WBKPfZOe9nbG4");'></div>
+</div>
+<div class="flex flex-1 flex-col justify-center">
+<p class="text-[17px] font-bold leading-none mb-1.5">David Chen</p>
+<div class="flex items-center">
+<span class="px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-[10px] font-bold uppercase tracking-wider">Commenter</span>
+</div>
+</div>
+<div class="shrink-0">
+<span class="material-symbols-outlined text-slate-300 group-hover:text-primary transition-colors">more_vert</span>
+</div>
+</div>
+<!-- Elena -->
+<div class="flex items-center gap-4 bg-white dark:bg-slate-900 p-4 rounded-2xl border border-transparent shadow-sm hover:shadow-md transition-all group">
+<div class="relative">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-14 w-14 border-2 border-orange-100 dark:border-orange-900 shadow-inner" data-alt="Elena Rodriguez" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAuHcOtJVS2EMUvTP4tAdI-batIGhYO6cIo-7Bx8MNTsI43FKHxtATW5jo_sAUfqLwUDSMxJ4kFUPw-RqEvjzFR0WtDox7UC0YgpDMEoa37DvyPwRBpet3lq47pOVgcrSKeg9kn0Y9-MRkJuAgEr0n3Z1Zd7NBnJKNYKP80KMACRhenKNRmNUs5eMW0bjY5byF3Qp00Z5a8Ysl1ITwTKqxNLtHzeD9t7WWUATTH5nP16_IZnTJqkAZbIeqqkg83utLrLYVBN3tRA_0");'></div>
+</div>
+<div class="flex flex-1 flex-col justify-center">
+<p class="text-[17px] font-bold leading-none mb-1.5">Elena Rodriguez</p>
+<div class="flex items-center">
+<span class="px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-[10px] font-bold uppercase tracking-wider">Viewer</span>
+</div>
+</div>
+<div class="shrink-0">
+<span class="material-symbols-outlined text-slate-300 group-hover:text-primary transition-colors">more_vert</span>
+</div>
+</div>
+</div>
+<div class="mt-10">
+<h3 class="text-xs font-bold uppercase tracking-[0.1em] text-slate-400 dark:text-slate-500 mb-4">Invitations</h3>
+<div class="bg-slate-100 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 p-8 text-center">
+<div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-white dark:bg-slate-800 shadow-sm mb-4">
+<span class="material-symbols-outlined text-primary text-2xl">celebration</span>
+</div>
+<p class="text-sm font-bold text-slate-700 dark:text-slate-200">Everyone's here!</p>
+<p class="text-xs text-slate-500 dark:text-slate-400 mt-2 max-w-[200px] mx-auto leading-relaxed">No pending invites. Want to bring someone new into the loop?</p>
+<button class="mt-4 text-primary font-bold text-xs uppercase tracking-widest hover:underline">Send an invite</button>
+</div>
+</div>
+</div>
+</main>
+<footer class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md border-t border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg">
+<div class="flex gap-2 px-4 pb-6 pt-2">
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">folder</span>
+<p class="text-[10px] font-bold uppercase tracking-widest">Projects</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined active-icon">group</span>
+<p class="text-[10px] font-bold uppercase tracking-widest">Members</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<p class="text-[10px] font-bold uppercase tracking-widest">Settings</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+<p class="text-[10px] font-bold uppercase tracking-widest">Profile</p>
+</a>
+</div>
+</footer>
+<!-- Role Change Bottom Sheet Mock (Hidden state) -->
+<div class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-end justify-center invisible">
+<div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-t-[2rem] p-8 transform translate-y-full transition-transform shadow-2xl">
+<div class="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-8"></div>
+<h4 class="text-xl font-bold mb-2">Member Role</h4>
+<p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Define what Elena can do in this group.</p>
+<div class="space-y-3">
+<button class="w-full flex items-center justify-between p-4 rounded-2xl border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+<div class="text-left">
+<p class="font-bold">Admin</p>
+<p class="text-xs text-slate-500">Can manage group settings &amp; members</p>
+</div>
+<span class="material-symbols-outlined text-slate-300">radio_button_unchecked</span>
+</button>
+<button class="w-full flex items-center justify-between p-4 rounded-2xl border-2 border-primary bg-primary/5">
+<div class="text-left">
+<p class="font-bold">Editor</p>
+<p class="text-xs text-slate-500">Can create and modify projects</p>
+</div>
+<span class="material-symbols-outlined text-primary active-icon">check_circle</span>
+</button>
+<button class="w-full flex items-center justify-between p-4 rounded-2xl border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+<div class="text-left">
+<p class="font-bold">Viewer</p>
+<p class="text-xs text-slate-500">Just here to look around</p>
+</div>
+<span class="material-symbols-outlined text-slate-300">radio_button_unchecked</span>
+</button>
+</div>
+<button class="w-full mt-8 py-4 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-2xl font-bold shadow-xl shadow-slate-900/10 transition-transform active:scale-95">
+                    Save Changes
+                </button>
+</div>
+</div>
+</div>
+</body></html>

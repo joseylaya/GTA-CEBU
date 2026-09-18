@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#2ecc70",
+            "background-light": "#f0f2f5",
+            "background-dark": "#131f18",
+          },
+          fontFamily: {
+            "display": ["Inter"]
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "2xl": "1rem",
+            "full": "9999px"
+          },
+        },
+      },
+    }
+  </script>
+<title>Tracker Feed</title>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+    .timeline-line {
+      position: absolute;
+      left: 36px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: #e2e8f0;
+      z-index: 0;
+    }
+    .dark .timeline-line {
+      background: #1e293b;
+    }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100">
+<div class="relative flex min-h-screen w-full flex-col max-w-md mx-auto bg-slate-50 dark:bg-background-dark shadow-xl overflow-x-hidden">
+<!-- Header -->
+<div class="flex items-center bg-white dark:bg-background-dark p-4 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-20">
+<div class="flex size-10 shrink-0 items-center justify-center cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+<span class="material-symbols-outlined text-slate-700 dark:text-slate-300">arrow_back</span>
+</div>
+<h2 class="text-lg font-bold leading-tight tracking-tight flex-1 text-center">Group Activity</h2>
+<div class="flex w-10 items-center justify-end">
+<button class="flex size-10 cursor-pointer items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-slate-700 dark:text-slate-300">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Integrated Balance & Collaborative Goal -->
+<div class="bg-white dark:bg-slate-900 px-4 py-6 border-b border-slate-200 dark:border-slate-800">
+<div class="flex items-center justify-between mb-4">
+<div>
+<p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Group Balance</p>
+<p class="text-3xl font-extrabold text-slate-900 dark:text-white">$450.00</p>
+</div>
+<div class="text-right">
+<p class="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded-full inline-block">You're owed</p>
+</div>
+</div>
+<div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-4 flex items-center gap-4">
+<div class="flex-1">
+<p class="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">Collaborative Goal</p>
+<div class="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[65%] rounded-full"></div>
+</div>
+<p class="text-[10px] text-slate-500 mt-2">Almost there! $250 more to settle the trip.</p>
+</div>
+<button class="shrink-0 bg-primary text-slate-900 font-bold px-4 py-2 rounded-xl text-sm hover:brightness-105 active:scale-95 transition-all">
+          Settle Up
+        </button>
+</div>
+</div>
+<!-- Feed Navigation -->
+<div class="sticky top-[73px] bg-white/80 dark:bg-background-dark/80 backdrop-blur-md z-10">
+<div class="flex border-b border-slate-200 dark:border-slate-800 px-4">
+<a class="flex flex-col items-center justify-center border-b-2 border-primary text-primary pb-3 pt-4 flex-1" href="#">
+<p class="text-xs font-bold leading-normal tracking-wide uppercase">Timeline</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-2 border-transparent text-slate-500 dark:text-slate-400 pb-3 pt-4 flex-1 hover:text-slate-800 dark:hover:text-slate-200 transition-colors" href="#">
+<p class="text-xs font-bold leading-normal tracking-wide uppercase">Members</p>
+</a>
+</div>
+</div>
+<!-- Activity Feed -->
+<div class="relative flex-1 p-4 flex flex-col gap-6">
+<div class="timeline-line"></div>
+<!-- Feed Item 1 (Alex) -->
+<div class="relative z-10 flex gap-4">
+<div class="size-12 rounded-full ring-4 ring-white dark:ring-background-dark overflow-hidden bg-blue-100 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-blue-600 text-3xl">account_circle</span>
+</div>
+<div class="flex-1 bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-2xl p-4 shadow-sm">
+<div class="flex justify-between items-start mb-2">
+<p class="text-sm text-slate-800 dark:text-slate-200">
+<span class="font-bold">Alex M.</span> paid for <span class="font-bold">Dinner at Lucca's</span>
+</p>
+<span class="text-xs text-slate-400 whitespace-nowrap ml-2">2h</span>
+</div>
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-sm text-slate-400">restaurant</span>
+<span class="text-lg font-bold text-primary">+$12.50</span>
+</div>
+<div class="flex items-center gap-4 border-t border-blue-100 dark:border-blue-900/30 pt-3">
+<button class="flex items-center gap-1.5 text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 0">favorite</span>
+<span class="text-xs font-bold">12</span>
+</button>
+<button class="flex items-center gap-1.5 text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg">chat_bubble</span>
+<span class="text-xs font-bold">2</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Feed Item 2 (You) -->
+<div class="relative z-10 flex gap-4">
+<div class="size-12 rounded-full ring-4 ring-white dark:ring-background-dark overflow-hidden bg-primary/20 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary text-3xl">face</span>
+</div>
+<div class="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
+<div class="flex justify-between items-start mb-2">
+<p class="text-sm text-slate-800 dark:text-slate-200">
+<span class="font-bold">You</span> added <span class="font-bold">Weekly Groceries</span>
+</p>
+<span class="text-xs text-slate-400 whitespace-nowrap ml-2">5h</span>
+</div>
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-sm text-slate-400">shopping_cart</span>
+<span class="text-lg font-bold text-slate-900 dark:text-white">-$45.20</span>
+</div>
+<div class="flex items-center gap-4 border-t border-slate-100 dark:border-slate-800 pt-3">
+<button class="flex items-center gap-1.5 text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg">favorite</span>
+<span class="text-xs font-bold">Liked</span>
+</button>
+<button class="flex items-center gap-1.5 text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg">chat_bubble</span>
+<span class="text-xs font-bold">Reply</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Feed Item 3 (Sarah) -->
+<div class="relative z-10 flex gap-4">
+<div class="size-12 rounded-full ring-4 ring-white dark:ring-background-dark overflow-hidden bg-orange-100 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-orange-600 text-3xl">account_circle</span>
+</div>
+<div class="flex-1 bg-orange-50/50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-900/30 rounded-2xl p-4 shadow-sm">
+<div class="flex justify-between items-start mb-2">
+<p class="text-sm text-slate-800 dark:text-slate-200">
+<span class="font-bold">Sarah K.</span> covered <span class="font-bold">Gas for Roadtrip</span>
+</p>
+<span class="text-xs text-slate-400 whitespace-nowrap ml-2">Oct 20</span>
+</div>
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-sm text-slate-400">local_gas_station</span>
+<span class="text-lg font-bold text-primary">+$32.00</span>
+</div>
+<div class="flex items-center gap-4 border-t border-orange-100 dark:border-orange-900/30 pt-3">
+<button class="flex items-center gap-1.5 text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg">favorite</span>
+<span class="text-xs font-bold">4</span>
+</button>
+<button class="flex items-center gap-1.5 text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg">chat_bubble</span>
+<span class="text-xs font-bold">Add Comment</span>
+</button>
+</div>
+</div>
+</div>
+<div class="py-10 text-center relative z-10">
+<p class="text-slate-400 dark:text-slate-600 text-xs font-medium italic">End of recent group activity</p>
+</div>
+</div>
+<!-- Bottom NavBar -->
+<div class="flex border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-background-dark px-4 pb-6 pt-2 sticky bottom-0 z-30">
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">home</span>
+<p class="text-[10px] font-bold uppercase tracking-wider">Home</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">group</span>
+<p class="text-[10px] font-bold uppercase tracking-wider">Groups</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">person</span>
+<p class="text-[10px] font-bold uppercase tracking-wider">Friends</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-primary transition-colors" href="#">
+<div class="relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute -top-1 -right-1 size-2 bg-red-500 rounded-full border border-white"></span>
+</div>
+<p class="text-[10px] font-bold uppercase tracking-wider">Activity</p>
+</a>
+</div>
+</div>
+</body></html>

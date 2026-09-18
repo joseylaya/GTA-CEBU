@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Reload Handling</title>
+    <style>
+        #customModal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+    <h1>Custom Reload Handling</h1>
+    <p>Try to reload or navigate away from this page.</p>
+
+    <div id="overlay"></div>
+    <div id="customModal">
+        <p>Are you sure you want to leave this page?</p>
+        <button id="stayBtn">Stay</button>
+        <button id="leaveBtn">Leave</button>
+    </div>
+
+    <script>
+        let isModalOpen = false;
+
+        window.addEventListener('beforeunload', (event) => {
+          alert("sdfsdfds")
+          return 'Are you sure you want to leave this page?';
+            if (!isModalOpen) {
+                // Prevent navigation with custom modal instead of browser dialog
+                openModal();
+                // Cancel the browser's action
+                event.preventDefault();
+                return ''; // Avoid triggering the default browser modal
+            }
+        });
+
+        function openModal() {
+            isModalOpen = true;
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('customModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            isModalOpen = false;
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('customModal').style.display = 'none';
+        }
+
+        document.getElementById('stayBtn').addEventListener('click', () => {
+            closeModal();
+        });
+
+        document.getElementById('leaveBtn').addEventListener('click', () => {
+            isModalOpen = false; // Let the navigation happen
+            closeModal();
+            window.location.href = window.location.href; // Simulate a reload or navigate programmatically
+        });
+    </script>
+</body>
+</html>

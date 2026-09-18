@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2ecc70",
+                        "background-light": "#f6f8f7",
+                        "background-dark": "#131f18",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="max-w-md mx-auto min-h-screen flex flex-col bg-white dark:bg-slate-900 shadow-xl overflow-hidden">
+<!-- Header -->
+<header class="px-6 pt-8 pb-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-800">
+<button class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+<span class="material-icons">close</span>
+</button>
+<h1 class="text-lg font-semibold">Add Transaction</h1>
+<div class="w-10"></div>
+</header>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto px-6 py-8">
+<form class="space-y-8">
+<!-- Amount Input -->
+<div class="text-center space-y-2">
+<label class="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Amount</label>
+<div class="flex items-center justify-center space-x-2">
+<span class="text-4xl font-bold text-primary">$</span>
+<input autofocus="" class="w-full max-w-[200px] text-5xl font-bold bg-transparent border-none focus:ring-0 text-center placeholder-slate-300 dark:placeholder-slate-700" placeholder="0.00" step="0.01" type="number"/>
+</div>
+</div>
+<!-- Fields -->
+<div class="space-y-6">
+<!-- Description -->
+<div class="space-y-2">
+<label class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">What was it for?</label>
+<div class="relative">
+<span class="material-icons absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">description</span>
+<input class="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-primary/50" placeholder="Dinner, Groceries, Rent..." type="text"/>
+</div>
+</div>
+<!-- Category Selection -->
+<div class="space-y-2">
+<label class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Category</label>
+<div class="grid grid-cols-4 gap-3">
+<button class="flex flex-col items-center p-3 rounded-xl bg-primary/10 border border-primary/20 text-primary" type="button">
+<span class="material-icons mb-1">restaurant</span>
+<span class="text-[10px] font-medium">Dining</span>
+</button>
+<button class="flex flex-col items-center p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-transparent hover:border-primary/20 transition-all" type="button">
+<span class="material-icons mb-1 text-slate-400">shopping_cart</span>
+<span class="text-[10px] font-medium">Grocery</span>
+</button>
+<button class="flex flex-col items-center p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-transparent hover:border-primary/20 transition-all" type="button">
+<span class="material-icons mb-1 text-slate-400">home</span>
+<span class="text-[10px] font-medium">Rent</span>
+</button>
+<button class="flex flex-col items-center p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-transparent hover:border-primary/20 transition-all" type="button">
+<span class="material-icons mb-1 text-slate-400">more_horiz</span>
+<span class="text-[10px] font-medium">Other</span>
+</button>
+</div>
+</div>
+<!-- Date & Payer Grid -->
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-2">
+<label class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Date</label>
+<div class="relative">
+<span class="material-icons absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm">calendar_today</span>
+<input class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary/50" type="text" value="Today"/>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Paid By</label>
+<button class="w-full flex items-center space-x-2 pl-3 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary/50" type="button">
+<img class="w-6 h-6 rounded-full object-cover" data-alt="User profile avatar icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3JNjynfIKBisngGrc8jIdTIU7-tiofmsVq-AfAKvR5HXPNa3Jkhabzgrl5tbE3rGpZH8KTLTCcv7T90OT9AMQub02o9MccGV1UkqHJidXnVLafuM1gp7x_enl3NVAMkBnfhANjqxyEHYD8eTtMhMVveoYnPvavvI_KM-hlPIZAJXHDukq7oMkpJxhyritUKaNeZTTUAfcmXMwmXNGF4CRr6EsgDwx0amk4vDzUtXFprWd2Xba-4Y21iHJhAoTorJtKJWr2UBrkmM"/>
+<span class="truncate font-medium">You</span>
+<span class="material-icons text-slate-400 text-sm ml-auto">expand_more</span>
+</button>
+</div>
+</div>
+<!-- Receipt Image Placeholder -->
+<div class="pt-4">
+<button class="w-full flex items-center justify-center space-x-2 py-4 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl text-slate-400 hover:text-primary hover:border-primary/50 transition-all" type="button">
+<span class="material-icons">receipt_long</span>
+<span class="text-sm font-medium">Add receipt image</span>
+</button>
+</div>
+</div>
+</form>
+</main>
+<!-- Footer Action -->
+<footer class="p-6 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
+<button class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/20 flex items-center justify-center space-x-2">
+<span>Next: Split Details</span>
+<span class="material-icons">chevron_right</span>
+</button>
+</footer>
+</div>
+<!-- Quick Tip Banner -->
+<div class="max-w-md mx-auto mt-4 px-6 py-3 bg-primary/10 border border-primary/20 rounded-lg flex items-center space-x-3">
+<span class="material-icons text-primary">lightbulb</span>
+<p class="text-xs text-slate-600 dark:text-slate-400 leading-tight">
+            Transactions are shared with the <span class="font-bold">Europe Trip</span> group members automatically.
+        </p>
+</div>
+</body></html>

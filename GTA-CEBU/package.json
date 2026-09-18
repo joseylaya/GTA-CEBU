@@ -1,0 +1,23 @@
+{
+  "name": "district-zero",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --env-file-if-exists=.env.local server.js",
+    "build": "vite build",
+    "preview": "node --env-file-if-exists=.env.local server.js --production",
+    "start": "node --env-file-if-exists=.env.local server.js --production",
+    "share": "bash tools/share-tailnet.sh",
+    "share:stop": "bash tools/share-tailnet.sh --stop"
+  },
+  "description": "Original browser city sandbox with shared players and chat",
+  "dependencies": {
+    "ioredis": "^6.0.0",
+    "three": "^0.186.0",
+    "ws": "^8.21.3"
+  },
+  "devDependencies": {
+    "vite": "^8.3.0"
+  }
+}

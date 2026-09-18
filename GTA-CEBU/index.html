@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111a20">
+  <title>District Zero — City Stories</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main id="app" aria-label="District Zero game">
+    <canvas id="game" aria-label="Third-person 3D city game"></canvas>
+    <div id="vignette"></div>
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">DZ</span><span>DISTRICT <strong>ZERO</strong><small>CEBU IT PARK · CITY SANDBOX</small></span></div>
+      <div class="top-actions"><span id="clock">DAY 01 · 09:00</span><button id="pauseBtn" class="icon-btn" title="Pause (Esc)">Ⅱ</button></div>
+    </header>
+    <section class="hud-left" aria-live="polite">
+      <div class="free-roam-card"><div class="eyebrow" id="activity-label">CITY LIFE</div><h2 id="activity-title">Make your own way</h2><p id="activity-detail">Visit a colored street marker for a courier run, passenger fare, or street circuit.</p><div id="activity-progress" class="activity-progress" hidden></div><div id="objective-distance" class="objective-distance" hidden></div></div>
+      <div id="hint" class="hint">WASD move · Shift sprint · E enter car</div>
+    </section>
+    <section class="hud-right" aria-label="Player status">
+      <div class="stat"><span>HEALTH</span><div class="meter"><i id="health-bar"></i></div><b id="health-value">200</b></div>
+      <div class="stat wanted" id="wanted-row"><span>WANTED</span><b id="wanted-stars">☆☆</b></div>
+      <div class="stat" id="cash-row"><span>CASH</span><b id="cash-value">₱0</b></div>
+      <div class="stat" id="rep-row"><span>STREET REP</span><b id="rep-value">0</b></div>
+      <div class="stat" id="upgrade-row"><span>ENGINE</span><b id="upgrade-value">LV 0</b></div>
+      <div class="stat" id="speed-row" hidden><span>SPEED</span><b><span id="speed-value">0</span> KM/H</b></div>
+      <div class="stat" id="weapon-row"><span>WEAPON</span><b id="weapon-value">PISTOL</b></div>
+      <div class="stat" id="ammo-row"><span>AMMO</span><b id="ammo-value">12 / 24</b></div>
+    </section>
+    <div class="radar-cluster"><div class="mini-map"><canvas id="minimap" width="180" height="180" aria-label="Nearby streets on circular radar"></canvas><span id="district-location">CEBU IT PARK</span></div><button id="open-map" class="map-button" type="button">DISTRICT MAP ↗</button><a class="map-credit" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a></div>
+    <div id="nav-cue" class="nav-cue" hidden><span id="nav-arrow">↑</span><div><b id="nav-title">DESTINATION</b><small id="nav-direction">AHEAD</small><small id="nav-distance">0 m</small></div></div>
+    <div id="combat-hud" class="combat-hud" hidden><span id="combat-weapon">PISTOL</span><div class="ammo-track"><i id="ammo-fill"></i></div><b id="combat-ammo">12 / 24</b><small id="reload-prompt" hidden>R · RELOAD</small></div>
+    <section class="social-panel" aria-label="Multiplayer chat">
+      <div class="social-heading"><span id="online-status">CONNECTING</span><button id="chat-toggle" type="button" aria-expanded="false">CHAT <kbd id="chat-key-label">ENTER</kbd></button></div>
+      <div id="voice-panel" class="voice-panel">
+        <button id="voice-status" class="voice-status" type="button" aria-label="Voice chat: off"><span id="voice-status-icon">🎙️</span><span id="voice-status-text">VOICE OFF</span></button>
+        <button id="voice-mode" class="voice-mode" type="button" aria-pressed="false">OPEN MIC OFF · T</button>
+        <small id="voice-hint" class="voice-hint">Click to enable microphone</small>
+        <ul id="voice-roster" class="voice-roster" aria-label="Nearby players"></ul>
+      </div>
+      <div id="mood-picker" class="mood-picker" aria-label="Choose a mood"></div>
+      <div id="chat-log" class="chat-log" role="log" aria-live="polite"></div>
+      <form id="chat-form" class="chat-form" hidden><input id="chat-input" type="text" maxlength="120" autocomplete="off" placeholder="Say something to the district" aria-label="Chat message"><button type="submit">SEND</button></form>
+    </section>
+    <div id="prompt" class="prompt" hidden></div>
+    <div id="toast" class="toast" role="status" hidden></div>
+    <div id="shot-flash" aria-hidden="true"></div>
+    <div id="damage-flash" aria-hidden="true"></div>
+    <div id="hit-marker" aria-hidden="true">×</div>
+    <div id="miss-marker" aria-hidden="true">○</div>
+    <div id="crosshair" hidden>＋</div>
+    <div id="overlay" class="overlay">
+      <div class="menu-panel">
+        <div class="eyebrow">AN ORIGINAL URBAN SANDBOX</div>
+        <h1>DISTRICT<br><em>ZERO</em></h1>
+        <p class="menu-copy">Take jobs, earn cash, upgrade your ride, and explore a city that reacts to your choices.</p>
+        <label class="name-field" for="player-name">YOUR DISPLAY NAME<input id="player-name" type="text" maxlength="20" autocomplete="nickname" placeholder="Player"></label>
+        <div class="menu-actions"><button id="newBtn" class="primary">NEW GAME <span>→</span></button><button id="continueBtn" disabled>CONTINUE <span>↗</span></button><button id="resumeBtn" hidden>RESUME <span>→</span></button><button id="customizeBtn" type="button">CUSTOMIZE CHARACTER <span>✦</span></button><button id="mapBtn" type="button">IT PARK MAP <span>⌖</span></button><button id="settingsBtn" type="button">SETTINGS <span>⚙</span></button><button id="saveBtn" hidden>SAVE GAME <span>↓</span></button><button id="loadBtn" hidden>LOAD GAME <span>↗</span></button></div>
+        <div id="district-map-panel" class="district-map-panel" hidden><div class="eyebrow">CEBU IT PARK · NORTH UP</div><p>Office towers, dining streets, Garden Bloc, and your current route.</p><canvas id="district-map" width="700" height="880" aria-label="Cebu IT Park streets and landmarks"></canvas><p class="map-legend">Gold: courier · Mint: fares · Purple: circuit · Blue: garage</p><p>Geography from <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>. Stylized exteriors and landscaping. <a href="/data/cebu-it-park.json" download>Map data (ODbL)</a></p></div><div id="settings-panel" class="settings-panel" hidden><div class="eyebrow">GAME SETTINGS</div><label>Mouse sensitivity <output id="sensitivity-value"></output><input id="sensitivity-setting" type="range" min="0.4" max="2" step="0.1"></label><label>Audio volume <output id="volume-value"></output><input id="volume-setting" type="range" min="0" max="1" step="0.05"></label><label>HUD size <output id="hud-size-value"></output><input id="hud-size-setting" type="range" min="0.8" max="1.4" step="0.05"></label><div class="eyebrow">KEY BINDINGS</div><p>Choose an action, then press a key. Esc cancels.</p><div id="key-bindings" class="key-bindings"></div></div>
+        <div id="customize-panel" class="customize-panel" hidden><div class="eyebrow">YOUR LOOK</div><p>Choose your Pirate Kit character. Your choice is shown to other players online.</p><label class="character-choice" for="character-choice">CHARACTER<select id="character-choice"><option value="Henry">Henry · Captain</option><option value="Anne">Anne · Navigator</option><option value="Mako">Mako · Deckhand</option><option value="Captain_Barbarossa">Captain Barbarossa</option><option value="Sharky">Sharky · Raider</option></select></label><div class="customize-layout"><canvas id="style-preview" width="120" height="160" aria-label="Character style preview"></canvas><div id="appearance-options" class="appearance-options"></div></div></div>
+        <div class="menu-footer"><div><b>ON FOOT</b>Move · Jump · Sprint · Interact · 1 fists · 2 pistol · Click attack · Reload</div><div><b>DRIVING</b>Move keys drive · Jump key handbrake · Interact to exit</div><div><b>FLIGHT CHEATS</b>ROCKETMAN: Space rise, Ctrl descend, E remove. JUMPJET: W rise in hover, Num 8 or B flight mode, Num 2 or B hover. OHDUDE: W rise, S descend, arrows move.</div><div><b>ACTIVITIES</b>Find colored street markers · Follow the road route · Earn cash · Upgrade at the garage</div><div><b>ONLINE</b>See other players · Enter opens chat · Pick a mood emoji · V push to talk · T open mic · Customize clothes while paused</div><div><b>CAMERA & SAVE</b>Move mouse to orbit · Right mouse aim · Esc pause · F5 save · F9 load · Change keys in Settings</div></div>
+        <div class="build-note">ORIGINAL BROWSER SANDBOX · WORK IN PROGRESS</div>
+      </div>
+    </div>
+  </main>
+  <script type="module" src="src/game.js"></script>
+</body>
+</html>

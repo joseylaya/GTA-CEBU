@@ -1,0 +1,24 @@
+HTTrack3.49-22 launched on Fri, 21 Aug 2026 17:38:55 at https://www.virtualthreads.io/configurator
+(httrack https://www.virtualthreads.io/configurator )
+
+Information, Warnings and Errors reported for this mirror:
+note:	the hts-log.txt file, and hts-cache folder, may contain sensitive information,
+	such as username/password authentication for websites mirrored in this project
+	do not share these files/folders if you want these information to remain private
+
+17:39:11	Error: 	"Not Found" (404) at link https://www.virtualthreads.io/static/chunks/9092-047417b20e4017e5.js?dpl=dpl_BgBu3N2V16LibyGdQM8gcXBFuEt3 (from https://www.virtualthreads.io/configurator)
+17:39:11	Error: 	"Not Found" (404) at link https://www.virtualthreads.io/static/chunks/6206-220dba8a7dd0f64a.js?dpl=dpl_BgBu3N2V16LibyGdQM8gcXBFuEt3 (from https://www.virtualthreads.io/configurator)
+17:39:11	Error: 	"Not Found" (404) at link https://www.virtualthreads.io/static/chunks/9538-9c2c5dc2bd7b8989.js?dpl=dpl_BgBu3N2V16LibyGdQM8gcXBFuEt3 (from https://www.virtualthreads.io/configurator)
+17:39:11	Error: 	"Not Found" (404) at link https://www.virtualthreads.io/static/chunks/7608-96f1584526f3f45e.js?dpl=dpl_BgBu3N2V16LibyGdQM8gcXBFuEt3 (from https://www.virtualthreads.io/configurator)
+17:39:11	Error: 	"Not Found" (404) at link https://www.virtualthreads.io/static/chunks/8500-fd2dcfc09a359754.js?dpl=dpl_BgBu3N2V16LibyGdQM8gcXBFuEt3 (from https://www.virtualthreads.io/configurator)
+17:39:11	Error: 	"Not Found" (404) at link https://www.virtualthreads.io/static/chunks/dc112a36-45ab09fcedbcfbe0.js?dpl=dpl_BgBu3N2V16LibyGdQM8gcXBFuEt3 (from https://www.virtualthreads.io/configurator)
+17:39:11	Error: 	"Not Found" (404) at link https://www.virtualthreads.io/static/chunks/94730671-dbc81860baa06b72.js?dpl=dpl_BgBu3N2V16LibyGdQM8gcXBFuEt3 (from https://www.virtualthreads.io/configurator)
+17:39:11	Error: 	"Not Found" (404) at link https://www.virtualthreads.io/static/chunks/8437-9782e6caf7aa52da.js?dpl=dpl_BgBu3N2V16LibyGdQM8gcXBFuEt3 (from https://www.virtualthreads.io/configurator)
+17:39:11	Error: 	"Not Found" (404) at link https://www.virtualthreads.io/static/chunks/475-9cc407da0f65b0e3.js?dpl=dpl_BgBu3N2V16LibyGdQM8gcXBFuEt3 (from https://www.virtualthreads.io/configurator)
+17:39:11	Error: 	"Not Found" (404) at link https://www.virtualthreads.io/static/chunks/9866-2a12cf7f47cfb7dc.js?dpl=dpl_BgBu3N2V16LibyGdQM8gcXBFuEt3 (from https://www.virtualthreads.io/configurator)
+17:39:11	Error: 	"Not Found" (404) at link https://www.virtualthreads.io/static/chunks/2310-d2bf6d5162d63133.js?dpl=dpl_BgBu3N2V16LibyGdQM8gcXBFuEt3 (from https://www.virtualthreads.io/configurator)
+17:39:11	Error: 	"Not Found" (404) at link https://www.virtualthreads.io/static/chunks/5648-c48313de6308a592.js?dpl=dpl_BgBu3N2V16LibyGdQM8gcXBFuEt3 (from https://www.virtualthreads.io/configurator)
+17:39:11	Error: 	"Not Found" (404) at link https://www.virtualthreads.io/static/chunks/5293-b1596b713dcddb81.js?dpl=dpl_BgBu3N2V16LibyGdQM8gcXBFuEt3 (from https://www.virtualthreads.io/configurator)
+
+HTTrack Website Copier/3.49-22 mirror complete in 16 seconds : 44 links scanned, 30 files written (1497857 bytes overall) [661327 bytes received at 41332 bytes/sec], 2432050 bytes transferred using HTTP compression in 38 files, ratio 24%
+(13 errors, 0 warnings, 0 messages)

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#2ecc70",
+              "background-light": "#f6f8f7",
+              "background-dark": "#131f18",
+            },
+            fontFamily: {
+              "display": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<title>Activity Feed</title>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100">
+<div class="relative flex min-h-screen w-full flex-col max-w-md mx-auto bg-white dark:bg-background-dark shadow-xl overflow-x-hidden">
+<!-- Header -->
+<div class="flex items-center bg-white dark:bg-background-dark p-4 sticky top-0 z-10 border-b border-slate-100 dark:border-slate-800 justify-between">
+<div class="text-slate-900 dark:text-slate-100 flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer">
+<span class="material-symbols-outlined">arrow_back</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight flex-1 px-4">Activity</h2>
+<div class="flex w-10 items-center justify-end">
+<button class="flex cursor-pointer items-center justify-center rounded-full size-10 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-900 dark:text-slate-100">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+</div>
+<!-- Content Area -->
+<div class="flex-1 overflow-y-auto">
+<!-- Section: Today -->
+<div class="px-4 py-3 bg-slate-50 dark:bg-slate-900/50">
+<h4 class="text-primary text-xs font-bold uppercase tracking-wider">Today</h4>
+</div>
+<!-- Activity Items -->
+<div class="divide-y divide-slate-100 dark:divide-slate-800">
+<!-- Item 1 -->
+<div class="flex items-start gap-4 bg-white dark:bg-background-dark px-4 py-4 hover:bg-slate-50 dark:hover:bg-slate-900/30 transition-colors">
+<div class="shrink-0">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-12 w-12 border-2 border-primary/20" data-alt="Close up portrait of Sarah smiling" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB6pg8GzyAcEjwyYhgr03mWERySkW3LiiILGlmdvwMaPgv0FTj5BwDzx3VhVdlb_Tzn8t-LCxL9zcEd1A_is8K8NHEpPz8y3JpqeJcBsBeyjcho3S5TPn_he3jAnWBPO4bouvCIqAe7FdvRMNUO6s2fP4UaPJ9CGnxg3SA-UJbEsB6xkwkw5UyL5-x84dKFKGH7KmWtY1cwSyIR511NCKnSSoJqLvwSNDC-SzczJD84xuv45Od8sp6NMOFOBpLQ0vD7GG-2d2vSJnw");'></div>
+</div>
+<div class="flex flex-col flex-1 gap-1">
+<div class="flex justify-between items-start">
+<p class="text-slate-900 dark:text-slate-100 text-sm font-semibold leading-snug">
+                                Sarah <span class="font-normal text-slate-500">added a transaction</span>
+</p>
+<span class="text-slate-400 dark:text-slate-500 text-[11px] font-medium uppercase whitespace-now-2">2m ago</span>
+</div>
+<div class="bg-primary/10 dark:bg-primary/5 rounded-lg p-3 mt-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm">shopping_cart</span>
+<p class="text-slate-700 dark:text-slate-300 text-sm font-medium">Grocery Shopping</p>
+</div>
+<p class="text-primary text-lg font-bold mt-1">$45.00</p>
+</div>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex items-start gap-4 bg-white dark:bg-background-dark px-4 py-4 hover:bg-slate-50 dark:hover:bg-slate-900/30 transition-colors">
+<div class="shrink-0">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-12 w-12 border-2 border-primary/20" data-alt="Portrait of Mark with neutral background" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBN0m2ro3n6j2BV1g7qYNnVOfcwS5P67xiQ5B_VFFxF-iS3lub8jyt4aGVYaVKL5YrjrwTqRMygAPrM6Vajlwyf_nGkug9WU0wKDWNeMTIxpdzgMV1KlrKuDQ8Y2Q3EWf0n-I789hQ6VtbinIjojQP33wXJPmud1zLf5GTO_eoiNQqou6AJq8k2mI40K9bztaD82MgFPkzSiorhLUvFPPBZwZNfNzx4iipPpxxgD2q_ik-EcemMh02jtjVsZ4IFWD7Qms5NqKowrsA");'></div>
+</div>
+<div class="flex flex-col flex-1 gap-1">
+<div class="flex justify-between items-start">
+<p class="text-slate-900 dark:text-slate-100 text-sm font-semibold leading-snug">
+                                Mark <span class="font-normal text-slate-500">commented on</span> Dinner
+                            </p>
+<span class="text-slate-400 dark:text-slate-500 text-[11px] font-medium uppercase whitespace-now-2">15m ago</span>
+</div>
+<p class="text-slate-600 dark:text-slate-400 text-sm italic border-l-2 border-primary/30 pl-3 py-1 mt-1">
+                            "That place was amazing! Best steak I've had in a while."
+                        </p>
+</div>
+</div>
+<!-- Section: Yesterday -->
+<div class="px-4 py-3 bg-slate-50 dark:bg-slate-900/50">
+<h4 class="text-slate-400 dark:text-slate-500 text-xs font-bold uppercase tracking-wider">Yesterday</h4>
+</div>
+<!-- Item 3 -->
+<div class="flex items-start gap-4 bg-white dark:bg-background-dark px-4 py-4 hover:bg-slate-50 dark:hover:bg-slate-900/30 transition-colors">
+<div class="shrink-0">
+<div class="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-white">
+<span class="material-symbols-outlined">person_add</span>
+</div>
+</div>
+<div class="flex flex-col flex-1 gap-1">
+<div class="flex justify-between items-start">
+<p class="text-slate-900 dark:text-slate-100 text-sm font-semibold leading-snug">
+                                Alex <span class="font-normal text-slate-500">was added to</span> Summer Trip 2024
+                            </p>
+<span class="text-slate-400 dark:text-slate-500 text-[11px] font-medium uppercase whitespace-now-2">1d ago</span>
+</div>
+<div class="flex -space-x-2 mt-2">
+<div class="h-8 w-8 rounded-full border-2 border-white dark:border-background-dark bg-slate-200" data-alt="Small avatar of user 1" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBtT5uFOBIy48MtOdV8LCc5pWJkDaBPiA6q7-S34hX0nUbvEBg6SOuIMuWtNwHOly4rAMkQD1R6ziyFZBKtf1gM347-tF_L-8OBEDCGVDfNkJqa7rfJ57C97xtnhZ5RfJFzs1kxh2WqXHvBtvPfTH-GBMGhhswslpNne8vocqxvMPZNqrc1YB7YM-hcBzhiu5NWmg8hHEJTj76W_Aqxix2_KpjbUvnUyfXXsY-yzMqpDfCiLk2ey7KWxXir51iN6KR3xIJIriJNP90')"></div>
+<div class="h-8 w-8 rounded-full border-2 border-white dark:border-background-dark bg-slate-200" data-alt="Small avatar of user 2" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDtfod0DP3pHXriwD_J_oNCNQ8tyMQR-rLtr0t_kIp5t37t2Usuu6xHgfnc88xrQC6I5lLCbhsg7eXi8pavZbWyHnToROnbAw57X0YVe_IGP0POWKsh6Wwb1e2XqrHFRwNGZwUEMmcwaRY81x7o1sGqjP4kmSuhRR-jxA-_p2Rs7bIl4zRt-LgATmr5eMrnW6lynRu0f7N9zQAnfWnc0IpocgMhLBt4fYM2gY6cr1JZ_Fsch4DxKYYWk1A5D4EsiF60rsRuLrGEZBg')"></div>
+<div class="h-8 w-8 rounded-full border-2 border-white dark:border-background-dark bg-primary flex items-center justify-center text-[10px] font-bold text-white">+12</div>
+</div>
+</div>
+</div>
+<!-- Item 4 -->
+<div class="flex items-start gap-4 bg-white dark:bg-background-dark px-4 py-4 hover:bg-slate-50 dark:hover:bg-slate-900/30 transition-colors">
+<div class="shrink-0">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-12 w-12 border-2 border-primary/20" data-alt="Portrait of Chloe" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDjI-OrWZV0cn_BUsPsONWwDk_CIDI_sPswYCA2dpUzaeruNqaIU5DiQv1N8jkXEMVPx96wNSpl55nwTJfdcsmE94y8cEZdhwXVdxJezlQbNw_9YELtyobuMEIs89D6SbALoJhUgOqGg-e689Emw1fUhkeqTfNTJjN2-32Cd7g0O-czvnzTRu_ydlH6hlVkMB8oozVkItsGdc_zRd1bD53bveanQmc--lZahQs57xdDbAB8XLBXSdARrBbX2Lcic3nvAsdIFXeZ0Jw");'></div>
+</div>
+<div class="flex flex-col flex-1 gap-1">
+<div class="flex justify-between items-start">
+<p class="text-slate-900 dark:text-slate-100 text-sm font-semibold leading-snug">
+                                Chloe <span class="font-normal text-slate-500">settled up with you</span>
+</p>
+<span class="text-slate-400 dark:text-slate-500 text-[11px] font-medium uppercase whitespace-now-2">1d ago</span>
+</div>
+<p class="text-primary text-sm font-medium">+$24.50 received</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Navigation Bar -->
+<div class="flex gap-2 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-background-dark px-4 pb-6 pt-2 sticky bottom-0 w-full">
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">home</span>
+<p class="text-[10px] font-bold uppercase tracking-widest">Home</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">history</span>
+<p class="text-[10px] font-bold uppercase tracking-widest">Activity</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+<p class="text-[10px] font-bold uppercase tracking-widest">Wallets</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">person</span>
+<p class="text-[10px] font-bold uppercase tracking-widest">Profile</p>
+</a>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#2ecc70",
+              "background-light": "#f6f8f7",
+              "background-dark": "#131f18",
+            },
+            fontFamily: {
+              "display": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<title>Finance Tracker Dashboard</title>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="max-w-md mx-auto bg-white dark:bg-slate-900 min-h-screen shadow-xl flex flex-col relative">
+<header class="sticky top-0 z-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md px-4 py-4 border-b border-slate-100 dark:border-slate-800">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="bg-primary/20 p-2 rounded-lg">
+<span class="material-symbols-outlined text-primary">account_balance_wallet</span>
+</div>
+<div>
+<h1 class="text-xl font-bold tracking-tight">Trackers</h1>
+<p class="text-xs text-slate-500 dark:text-slate-400">Manage your shared expenses</p>
+</div>
+</div>
+<button class="size-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-300">notifications</span>
+</button>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto pb-24">
+<section class="p-4 grid grid-cols-2 gap-4">
+<div class="bg-primary/10 dark:bg-primary/5 p-4 rounded-xl border border-primary/20">
+<p class="text-sm font-medium text-slate-600 dark:text-slate-400">Total Balance</p>
+<h3 class="text-2xl font-bold text-primary mt-1">$4,250.00</h3>
+<div class="flex items-center gap-1 mt-2 text-emerald-600 dark:text-emerald-400 text-xs font-semibold">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span>+12.5%</span>
+</div>
+</div>
+<div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
+<p class="text-sm font-medium text-slate-600 dark:text-slate-400">Active Goals</p>
+<h3 class="text-2xl font-bold mt-1">8</h3>
+<div class="flex items-center gap-1 mt-2 text-primary text-xs font-semibold">
+<span class="material-symbols-outlined text-sm">flag</span>
+<span>2 Completed</span>
+</div>
+</div>
+</section>
+<section class="px-4 py-2">
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-lg font-bold">Your Trackers</h2>
+<button class="text-primary text-sm font-semibold flex items-center gap-1">
+                        View All <span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+<div class="space-y-4">
+<!-- Tracker Card 1 -->
+<div class="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-100 dark:border-slate-700 shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<div class="flex gap-3">
+<div class="size-12 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+<span class="material-symbols-outlined">home</span>
+</div>
+<div>
+<h3 class="font-bold text-slate-800 dark:text-slate-100">Apartment Rent</h3>
+<p class="text-xs text-slate-500">Monthly recurring</p>
+</div>
+</div>
+<span class="bg-primary/10 text-primary text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider">Active</span>
+</div>
+<div class="flex items-end justify-between">
+<div>
+<p class="text-xs text-slate-400 font-medium">Shared Balance</p>
+<p class="text-xl font-bold">$1,200.00</p>
+</div>
+<div class="flex -space-x-2">
+<img alt="" class="size-8 rounded-full border-2 border-white dark:border-slate-800" data-alt="User avatar 1" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDN3Sp38XD0ufEV9koUo5F0MMlWAq7ezbA5lBL86cY2QxFCpHctTiKHOuOJmn2f6M9DRi_WIVn668xWTwzS8gj5YiFs0sUQ0JaH4mTcOmB_Y3W788Dlbb3I0SI9SqLwJh6Em8--9xZsYYEap0SiPGAncgzWDqpZESVVIRH8Tuk5WSLayM53QSI6fd9O8tAQWmZgiTNHmUXebaG8AalwEecmrHuEZxJMwOZmp3RXfsjzoc8woxxFyWc1SkhbZ-0VKpHa7yNfeHNloOI"/>
+<img alt="" class="size-8 rounded-full border-2 border-white dark:border-slate-800" data-alt="User avatar 2" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD3qQukCLJsvX9Q3rqEs1P7ONBVfoy2u8uvuNssEeZwPjz6BO2g4Z0WaBdGoLuU9M7xAIseUrO2QvhIvmhBQNyKCvXljqmW5G9hmjqy0_rermofyYjFAvrEELatHFSagVCvlzSS7zzRypT3TPj344fLVwye2dfOTdKuiFIFVgThbVK5n-iFHYF2MVIcjmLM_tfl6iIZeNwK6TRWQnSQQ4D8vLBs5eZ1RgppPNEOEa-KKPBdW8d1nwlIfrosypc9zqd26jRWKeA4DKk"/>
+<img alt="" class="size-8 rounded-full border-2 border-white dark:border-slate-800" data-alt="User avatar 3" src="https://lh3.googleusercontent.com/aida-public/AB6AXuARHzVUVGGF3BoYV9_44gFVtbxx5Gufu-lY2X5BgAq2CRtxyBlNiFimXbzRrIrqHZ7UBzkqetqAZBt5SomUgsV-5oOU0_YyA5hegotp4BsijueXJRYyPJjmW-CApY_pUJRtjt-_GhHBUWXzvv8h0i8Uu102KosV9axmeFaCirWn3_3yJPRk9c40X425u__e7_gGUyF2JfJHjO1z9rwBUD8hRaqBVEe_ldcrAFbtLRfF6pn-10DMVwEWoCxfLop6D48UiX9-sXbsH8c"/>
+<div class="size-8 rounded-full bg-slate-100 dark:bg-slate-700 border-2 border-white dark:border-slate-800 flex items-center justify-center text-[10px] font-bold text-slate-500">+1</div>
+</div>
+</div>
+</div>
+<!-- Tracker Card 2 -->
+<div class="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-100 dark:border-slate-700 shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<div class="flex gap-3">
+<div class="size-12 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
+<span class="material-symbols-outlined">flight</span>
+</div>
+<div>
+<h3 class="font-bold text-slate-800 dark:text-slate-100">Iceland Trip</h3>
+<p class="text-xs text-slate-500">Vacation fund</p>
+</div>
+</div>
+<span class="bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider">Saving</span>
+</div>
+<div class="flex items-end justify-between">
+<div>
+<p class="text-xs text-slate-400 font-medium">Target: $5,000.00</p>
+<p class="text-xl font-bold">$2,450.00</p>
+<div class="w-32 h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full mt-2 overflow-hidden">
+<div class="bg-amber-500 h-full w-[49%]"></div>
+</div>
+</div>
+<div class="flex -space-x-2">
+<img alt="" class="size-8 rounded-full border-2 border-white dark:border-slate-800" data-alt="User avatar 10" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrnxLce58y0CMzxAipfdG_iTd_owQCEyxKv-587M4lXx0LBB1-CNdERnFgjI41Wu3aoYM0TlO_5UtWNByrlLO_nkFEKNTUGz4yNP1oBBJiDnT-wqDOKf37_eme77iIQUxuTRzXMKmC3DpfSMDqxjXpn_p2AeEIvC42Sd9EaiqoI4ILzJkK3uLQM328Arq404tqF_vCWDvoFa09lab6TPNd4mFkeJH5PF0UkedEyDZqmSioYpWSC2Y3iK6sjWpAd_--tnWsac7-qxs"/>
+<img alt="" class="size-8 rounded-full border-2 border-white dark:border-slate-800" data-alt="User avatar 11" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZwJB1pMJLebCnijgvN89LZAUVRZs8HTICiggRPU9x19cFNaTIGT12RnaqGL8jWRrFi8IIx_sPMEmpZ4kdTfHEKVmDAhwZSyk5suXEoqHVNjwcp_K9KBE9qxqt2PkPP77gcLU_EuuXdQ7SutJLM3qCJZmLODb6_axiuh6janjcYWmZnCWdV6heDVLJ0_RYz9i1YF0z0D9T3GssGi0OGK3Vk8lxbAUeULQN8M4aQDap-H9BsPzAcaGbwd_zffZrForDXZgvlcXgLHQ"/>
+</div>
+</div>
+</div>
+<!-- Tracker Card 3 -->
+<div class="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-100 dark:border-slate-700 shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<div class="flex gap-3">
+<div class="size-12 rounded-lg bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center text-rose-600 dark:text-rose-400">
+<span class="material-symbols-outlined">restaurant</span>
+</div>
+<div>
+<h3 class="font-bold text-slate-800 dark:text-slate-100">Sunday Dinner</h3>
+<p class="text-xs text-slate-500">Split bill</p>
+</div>
+</div>
+<span class="bg-slate-100 dark:bg-slate-700 text-slate-500 text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider">Pending</span>
+</div>
+<div class="flex items-end justify-between">
+<div>
+<p class="text-xs text-slate-400 font-medium">Unpaid total</p>
+<p class="text-xl font-bold">$124.50</p>
+</div>
+<div class="flex -space-x-2">
+<img alt="" class="size-8 rounded-full border-2 border-white dark:border-slate-800" data-alt="User avatar 20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuANQ2UUEfRNPVbYpgaYge0kaYqiyAA47JIiWhkApaegv2PfevSjMMFxhe9fa-1V81rGJ28Elq4f87gfr0MjmK3puVKHuavh5CV3nrdEGsOGyGvcV_8pXAkbU5i5Xoz92a5A1bOLrgxPp5h41rP9Of4ZovvxrY9AlTeGvQ1A1LknwdJehA1ArlGoDDVo87_T8ycs6R_Hk5rsuXLZ1jG9SlPZqqJu6B2BCkLjbORmW3pdHu76uaGgHWRI59RNiiLHmcCSTX37C9ZzO7g"/>
+<img alt="" class="size-8 rounded-full border-2 border-white dark:border-slate-800" data-alt="User avatar 21" src="https://lh3.googleusercontent.com/aida-public/AB6AXuARA1CT6cszbOm01bgnLHc0GPk72CmTHqvqdBUrb6Fpj83D0T58dlm7KSWDaAAwTUCOSDhRwGx6wGc88idCXOINcXK2hj7NlfT3905c28D2Pib_u7ZRcn9riJ03_e1txwVjspnYmZ12nRIOXX7KC6wmqoLf076tu_7HCtJ05PaRiJnPvs1Trf9Dyh4cTnrD0RDy_L90Pl56wG3ghy77MaJcLPLjEP4l6XMmnMohIryXskI_PlQ-C97k0GTwTwfBIbCqXIkhQagB7a8"/>
+<img alt="" class="size-8 rounded-full border-2 border-white dark:border-slate-800" data-alt="User avatar 22" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3aH-ztRMt4kWfhWBDbRLtw1E6TKuDeXm-9KziHcRYRWUONj9yrdr1AgYzxO5zOo9dwpVISjP6DyC5nPk3E1mYZUhul5jtA0achQPAa047OgGhi2fdV7hL4hbe7oQ6sprKKcUXzvlHkV72q1S_FVIVIGt5dHNALbyO-wKmHC7JSTfo7bofVHVU4bAz54p2XouXx36W8RXQICbxP4jmzZ9GRnBULWbWIDvmikyR0c9Gbbbln5r2ZI2B-vPvxzu5RcUEkDG4V6aq5Ig"/>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Floating Action Button -->
+<button class="absolute bottom-20 right-4 size-14 rounded-full bg-primary text-white shadow-lg shadow-primary/40 flex items-center justify-center active:scale-95 transition-transform z-20">
+<span class="material-symbols-outlined scale-125">add</span>
+</button>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-100 dark:border-slate-800 flex justify-around items-center py-2 px-6 z-10">
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="text-[10px] font-medium">Home</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined font-fill">list_alt</span>
+<span class="text-[10px] font-bold">Trackers</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">pie_chart</span>
+<span class="text-[10px] font-medium">Budgets</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-[10px] font-medium">Settings</span>
+</a>
+</nav>
+</div>
+</body></html>

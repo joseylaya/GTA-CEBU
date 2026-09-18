@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#2ecc70",
+              "background-light": "#f8fafc",
+              "background-dark": "#0f172a",
+            },
+            fontFamily: {
+              "display": ["Fredoka", "Inter", "sans-serif"],
+              "body": ["Inter", "sans-serif"]
+            },
+            borderRadius: {
+              "DEFAULT": "0.5rem",
+              "lg": "0.75rem",
+              "xl": "1.25rem",
+              "2xl": "1.75rem",
+              "full": "9999px"
+            },
+          },
+        },
+      }
+    </script>
+<title>Shared Spaces Dashboard</title>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+            font-family: 'Inter', sans-serif;
+        }
+        .font-display { font-family: 'Fredoka', sans-serif; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="max-w-md mx-auto bg-white dark:bg-slate-900 min-h-screen shadow-2xl flex flex-col relative">
+<!-- Welcoming Header -->
+<header class="sticky top-0 z-10 bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg px-6 py-6 border-b border-slate-50 dark:border-slate-800">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="bg-primary/10 p-3 rounded-2xl rotate-3">
+<span class="material-symbols-outlined text-primary scale-110">celebration</span>
+</div>
+<div>
+<h1 class="text-2xl font-bold font-display tracking-tight text-slate-800 dark:text-white">Hey there! 👋</h1>
+<p class="text-sm text-slate-500 dark:text-slate-400 font-medium">Ready to sync up today?</p>
+</div>
+</div>
+<button class="size-11 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center border border-slate-100 dark:border-slate-700">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-300">notifications</span>
+</button>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto pb-28">
+<!-- Shared Status Section -->
+<section class="p-6">
+<div class="bg-primary/5 dark:bg-primary/10 p-6 rounded-2xl border-2 border-primary/10 relative overflow-hidden">
+<div class="absolute -right-4 -top-4 size-24 bg-primary/10 rounded-full blur-2xl"></div>
+<div class="relative z-10">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary text-lg">group</span>
+<p class="text-sm font-semibold text-primary/80 uppercase tracking-wider font-display">Shared Pool</p>
+</div>
+<div class="flex items-baseline gap-2">
+<h3 class="text-4xl font-bold font-display text-slate-800 dark:text-white">$4,250.00</h3>
+<div class="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 text-sm font-bold">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span>+12%</span>
+</div>
+</div>
+<p class="text-xs text-slate-500 mt-2 font-medium">Looking good! You've reached 8 shared goals this month.</p>
+</div>
+</div>
+</section>
+<!-- Social Feed Style List -->
+<section class="px-6">
+<div class="flex items-center justify-between mb-6">
+<h2 class="text-xl font-bold font-display">Shared Spaces</h2>
+<button class="text-primary text-sm font-bold flex items-center gap-1 bg-primary/10 px-3 py-1 rounded-full">
+                    See All <span class="material-symbols-outlined text-xs">arrow_forward</span>
+</button>
+</div>
+<div class="space-y-6">
+<!-- Space Card 1 -->
+<div class="bg-white dark:bg-slate-800/50 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow">
+<div class="flex justify-between items-start mb-6">
+<div class="flex gap-4">
+<div class="size-14 rounded-2xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 rotate-[-2deg]">
+<span class="material-symbols-outlined scale-110">home</span>
+</div>
+<div>
+<h3 class="font-bold text-lg font-display text-slate-800 dark:text-slate-100">The Dream Loft</h3>
+<p class="text-xs font-medium text-slate-400">Rent &amp; Utilities • Monthly</p>
+</div>
+</div>
+<span class="bg-primary/10 text-primary text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-primary/20">Current</span>
+</div>
+<div class="flex items-center justify-between bg-slate-50 dark:bg-slate-900/50 rounded-xl p-4">
+<div>
+<p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Collective</p>
+<p class="text-2xl font-bold font-display">$1,200</p>
+</div>
+<div class="flex -space-x-3">
+<img alt="User 1" class="size-10 rounded-full border-4 border-white dark:border-slate-800" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDN3Sp38XD0ufEV9koUo5F0MMlWAq7ezbA5lBL86cY2QxFCpHctTiKHOuOJmn2f6M9DRi_WIVn668xWTwzS8gj5YiFs0sUQ0JaH4mTcOmB_Y3W788Dlbb3I0SI9SqLwJh6Em8--9xZsYYEap0SiPGAncgzWDqpZESVVIRH8Tuk5WSLayM53QSI6fd9O8tAQWmZgiTNHmUXebaG8AalwEecmrHuEZxJMwOZmp3RXfsjzoc8woxxFyWc1SkhbZ-0VKpHa7yNfeHNloOI"/>
+<img alt="User 2" class="size-10 rounded-full border-4 border-white dark:border-slate-800" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD3qQukCLJsvX9Q3rqEs1P7ONBVfoy2u8uvuNssEeZwPjz6BO2g4Z0WaBdGoLuU9M7xAIseUrO2QvhIvmhBQNyKCvXljqmW5G9hmjqy0_rermofyYjFAvrEELatHFSagVCvlzSS7zzRypT3TPj344fLVwye2dfOTdKuiFIFVgThbVK5n-iFHYF2MVIcjmLM_tfl6iIZeNwK6TRWQnSQQ4D8vLBs5eZ1RgppPNEOEa-KKPBdW8d1nwlIfrosypc9zqd26jRWKeA4DKk"/>
+<img alt="User 3" class="size-10 rounded-full border-4 border-white dark:border-slate-800" src="https://lh3.googleusercontent.com/aida-public/AB6AXuARHzVUVGGF3BoYV9_44gFVtbxx5Gufu-lY2X5BgAq2CRtxyBlNiFimXbzRrIrqHZ7UBzkqetqAZBt5SomUgsV-5oOU0_YyA5hegotp4BsijueXJRYyPJjmW-CApY_pUJRtjt-_GhHBUWXzvv8h0i8Uu102KosV9axmeFaCirWn3_3yJPRk9c40X425u__e7_gGUyF2JfJHjO1z9rwBUD8hRaqBVEe_ldcrAFbtLRfF6pn-10DMVwEWoCxfLop6D48UiX9-sXbsH8c"/>
+<div class="size-10 rounded-full bg-slate-200 dark:bg-slate-700 border-4 border-white dark:border-slate-800 flex items-center justify-center text-xs font-bold text-slate-600 dark:text-slate-300">+1</div>
+</div>
+</div>
+</div>
+<!-- Space Card 2 -->
+<div class="bg-white dark:bg-slate-800/50 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 shadow-sm">
+<div class="flex justify-between items-start mb-6">
+<div class="flex gap-4">
+<div class="size-14 rounded-2xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400 rotate-[2deg]">
+<span class="material-symbols-outlined scale-110">flight_takeoff</span>
+</div>
+<div>
+<h3 class="font-bold text-lg font-display text-slate-800 dark:text-slate-100">Iceland Trip ❄️</h3>
+<p class="text-xs font-medium text-slate-400">Vacation Savings</p>
+</div>
+</div>
+<span class="bg-amber-50 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-amber-100 dark:border-amber-800">Growing</span>
+</div>
+<div class="space-y-4">
+<div class="flex items-end justify-between">
+<div>
+<p class="text-2xl font-bold font-display text-slate-800 dark:text-white">$2,450</p>
+<p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Goal: $5,000</p>
+</div>
+<div class="flex -space-x-3">
+<img alt="User 10" class="size-10 rounded-full border-4 border-white dark:border-slate-800" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrnxLce58y0CMzxAipfdG_iTd_owQCEyxKv-587M4lXx0LBB1-CNdERnFgjI41Wu3aoYM0TlO_5UtWNByrlLO_nkFEKNTUGz4yNP1oBBJiDnT-wqDOKf37_eme77iIQUxuTRzXMKmC3DpfSMDqxjXpn_p2AeEIvC42Sd9EaiqoI4ILzJkK3uLQM328Arq404tqF_vCWDvoFa09lab6TPNd4mFkeJH5PF0UkedEyDZqmSioYpWSC2Y3iK6sjWpAd_--tnWsac7-qxs"/>
+<img alt="User 11" class="size-10 rounded-full border-4 border-white dark:border-slate-800" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZwJB1pMJLebCnijgvN89LZAUVRZs8HTICiggRPU9x19cFNaTIGT12RnaqGL8jWRrFi8IIx_sPMEmpZ4kdTfHEKVmDAhwZSyk5suXEoqHVNjwcp_K9KBE9qxqt2PkPP77gcLU_EuuXdQ7SutJLM3qCJZmLODb6_axiuh6janjcYWmZnCWdV6heDVLJ0_RYz9i1YF0z0D9T3GssGi0OGK3Vk8lxbAUeULQN8M4aQDap-H9BsPzAcaGbwd_zffZrForDXZgvlcXgLHQ"/>
+</div>
+</div>
+<div class="relative h-3 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+<div class="absolute top-0 left-0 bg-amber-400 h-full rounded-full transition-all duration-1000" style="width: 49%"></div>
+</div>
+</div>
+</div>
+<!-- Space Card 3 -->
+<div class="bg-white dark:bg-slate-800/50 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 shadow-sm opacity-80">
+<div class="flex justify-between items-start mb-6">
+<div class="flex gap-4">
+<div class="size-14 rounded-2xl bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center text-rose-600 dark:text-rose-400 rotate-[-1deg]">
+<span class="material-symbols-outlined scale-110">restaurant</span>
+</div>
+<div>
+<h3 class="font-bold text-lg font-display text-slate-800 dark:text-slate-100">Sunday Feast</h3>
+<p class="text-xs font-medium text-slate-400">Dinner Out • Split</p>
+</div>
+</div>
+<span class="bg-slate-100 dark:bg-slate-700 text-slate-500 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-slate-200">Pending</span>
+</div>
+<div class="flex items-center justify-between">
+<div>
+<p class="text-2xl font-bold font-display">$124.50</p>
+<p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Unpaid Balance</p>
+</div>
+<div class="flex -space-x-3">
+<img alt="User 20" class="size-10 rounded-full border-4 border-white dark:border-slate-800" src="https://lh3.googleusercontent.com/aida-public/AB6AXuANQ2UUEfRNPVbYpgaYge0kaYqiyAA47JIiWhkApaegv2PfevSjMMFxhe9fa-1V81rGJ28Elq4f87gfr0MjmK3puVKHuavh5CV3nrdEGsOGyGvcV_8pXAkbU5i5Xoz92a5A1bOLrgxPp5h41rP9Of4ZovvxrY9AlTeGvQ1A1LknwdJehA1ArlGoDDVo87_T8ycs6R_Hk5rsuXLZ1jG9SlPZqqJu6B2BCkLjbORmW3pdHu76uaGgHWRI59RNiiLHmcCSTX37C9ZzO7g"/>
+<img alt="User 21" class="size-10 rounded-full border-4 border-white dark:border-slate-800" src="https://lh3.googleusercontent.com/aida-public/AB6AXuARA1CT6cszbOm01bgnLHc0GPk72CmTHqvqdBUrb6Fpj83D0T58dlm7KSWDaAAwTUCOSDhRwGx6wGc88idCXOINcXK2hj7NlfT3905c28D2Pib_u7ZRcn9riJ03_e1txwVjspnYmZ12nRIOXX7KC6wmqoLf076tu_7HCtJ05PaRiJnPvs1Trf9Dyh4cTnrD0RDy_L90Pl56wG3ghy77MaJcLPLjEP4l6XMmnMohIryXskI_PlQ-C97k0GTwTwfBIbCqXIkhQagB7a8"/>
+<img alt="User 22" class="size-10 rounded-full border-4 border-white dark:border-slate-800" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3aH-ztRMt4kWfhWBDbRLtw1E6TKuDeXm-9KziHcRYRWUONj9yrdr1AgYzxO5zOo9dwpVISjP6DyC5nPk3E1mYZUhul5jtA0achQPAa047OgGhi2fdV7hL4hbe7oQ6sprKKcUXzvlHkV72q1S_FVIVIGt5dHNALbyO-wKmHC7JSTfo7bofVHVU4bAz54p2XouXx36W8RXQICbxP4jmzZ9GRnBULWbWIDvmikyR0c9Gbbbln5r2ZI2B-vPvxzu5RcUEkDG4V6aq5Ig"/>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Playful Floating Action Button -->
+<button class="absolute bottom-24 right-6 size-16 rounded-2xl bg-primary text-white shadow-xl shadow-primary/30 flex items-center justify-center active:scale-90 transition-all z-20 border-4 border-white dark:border-slate-900 rotate-12">
+<span class="material-symbols-outlined scale-150">add_reaction</span>
+</button>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-50 dark:border-slate-800 flex justify-around items-center py-4 px-6 z-10">
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">bubble_chart</span>
+<span class="text-[10px] font-bold uppercase tracking-widest font-display">Feed</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined font-fill">group_work</span>
+<span class="text-[10px] font-bold uppercase tracking-widest font-display">Spaces</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">auto_awesome</span>
+<span class="text-[10px] font-bold uppercase tracking-widest font-display">Goals</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">sentiment_satisfied</span>
+<span class="text-[10px] font-bold uppercase tracking-widest font-display">You</span>
+</a>
+</nav>
+</div>
+</body></html>
