@@ -1,0 +1,35 @@
+# Cloudflare Pages reads this; vercel.json does not apply here. Keep the two in
+# step -- these rules are what keep the district's 12MB of models cheap to load.
+
+# Cloudflare picks compression from the content type and .obj is not on its
+# list, so the aircraft would ship as 1.5MB of raw text. OBJLoader reads the
+# body as text, so declaring it text is accurate as well as convenient.
+/models/*.obj
+  Content-Type: text/plain; charset=utf-8
+
+# Same reason for the rest of the model formats. A .gltf genuinely is JSON, so
+# that one is simply accurate. The mesh buffers and FBX are binary, but three's
+# loaders read them as ArrayBuffers and never look at the type -- and they gzip
+# by about 90%, which is the difference between a 3.2MB download and a 355KB
+# one. Measured per format below; do not "correct" these without re-measuring.
+/models/*.gltf
+  Content-Type: application/json; charset=utf-8
+
+/models/*.bin
+  Content-Type: text/plain; charset=utf-8
+
+/models/*.fbx
+  Content-Type: text/plain; charset=utf-8
+
+# Models and sounds change only when we ship one. An hour of hard caching with
+# a day of stale-while-revalidate makes a repeat visit instant while still
+# picking up a new asset quickly.
+/models/*
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+
+/audio/*
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+
+# Hashed bundles can be cached forever; the filename changes when they do.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

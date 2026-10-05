@@ -5,3 +5,16 @@ dist/
 .vercel
 .env*
 3d-assets/
+
+# Local source/reference packs. Runtime-ready copies live under public/.
+Sci-Fi-Gun-Pack/
+ogg-files/
+sound-effect/
+flat-icons/
+stitch_kids_game_ui_redesign/
+Among_Us_in_Minecraft_Complete_Guide.md
+1570653-valorant-project-gameplay-reveal-trailer.jpg
+ChatGPT Image*.png
+image.png
+images.jpeg
+docs/image.png

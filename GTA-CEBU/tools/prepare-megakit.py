@@ -12,6 +12,8 @@ source = root / '3d-assets/Downtown City MegaKit[Standard]/Exports/glTF (Godot)'
 target = root / 'public/models/megakit'
 selected = [
     'Prop_Planter_Single', 'Prop_Bollard', 'Prop_ManholeCover', 'Prop_ACUnit',
+    'Building_Small_1', 'Building_Medium_2_001', 'Building_Large_2',
+    'Street_2Lane', 'Sidewalk_Straight_3m', 'Entrance_Concrete_2x2',
 ]
 target.mkdir(parents=True, exist_ok=True)
 images = set()

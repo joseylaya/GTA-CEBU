@@ -1,0 +1,27 @@
+{
+  // The static site. Separate from wrangler.jsonc, which is the multiplayer
+  // Durable Object -- two different Workers, deployed independently.
+  //
+  //   npm run build && npx wrangler deploy -c wrangler.site.jsonc
+  //
+  // Cloudflare now serves Pages through Workers Static Assets. Requests for
+  // static files here are unmetered, which is the whole reason for moving off
+  // Vercel's bandwidth allowance.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "district-zero",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "directory": "./dist",
+    // The game has no client-side routes, so a missing file should say so
+    // rather than quietly returning the HTML shell -- that turns a typo in an
+    // asset path into a confusing parser error instead of a clean 404.
+    "not_found_handling": "none"
+  },
+  // The public address of the game. Declared here so the hostname always
+  // follows this Worker -- it was briefly attached to the multiplayer Worker,
+  // which answered every page with its own 404.
+  "routes": [
+    { "pattern": "dz.jmgaming.site", "custom_domain": true }
+  ],
+  "observability": { "enabled": true }
+}

@@ -11,6 +11,17 @@ npm run dev
 
 Open `http://127.0.0.1:5173/`. The Node server provides both the Vite development game and the live player/chat endpoints. Open the game in two browser windows to join the same district locally.
 
+### Local account progression
+
+Gameplay now requires a player account. The local Node server reads
+`DATABASE_URL` from `.env.local`; apply the SQL files in `db/` in numeric order
+before starting it. Existing account databases that already have migrations
+001–003 need [`db/004-open-world-progression.sql`](db/004-open-world-progression.sql)
+and [`db/005-activities.sql`](db/005-activities.sql). These migrations make job
+money, XP, street reputation, upgrades, activity completions, wins, and best
+times persistent. Local browser saves retain position and health only; they are
+no longer trusted for progression values.
+
 ## Cebu IT Park map
 
 The streets, building footprints, parks, mapped trees, and named points of interest come from [OpenStreetMap contributors](https://www.openstreetmap.org/copyright) under the [Open Database License](https://opendatacommons.org/licenses/odbl/1.0/). The source snapshot is in [`src/data/it-park.json`](src/data/it-park.json), with a downloadable copy at `/data/cebu-it-park.json`. The conversion script is [`tools/import-it-park.py`](tools/import-it-park.py); pass it an OSM XML extract from the source URL recorded in the snapshot's `meta.source` field to regenerate both copies.
@@ -29,9 +40,33 @@ For Vercel, the project includes `vercel.json` and `api/ws.js`. The production b
 
 For another Node host, run `npm run build` followed by `HOST=0.0.0.0 PORT=5173 npm start` behind an HTTPS reverse proxy. The Node server provides the original single-process multiplayer backend; the Vercel deployment uses its separate shared backend.
 
+### AWS multiplayer service
+
+For production multiplayer, run the dedicated Node.js WebSocket service on ECS/Fargate, EC2, or another long-running AWS container host. Place it in the same VPC as ElastiCache or MemoryDB and allow TCP 6379 from the application's security group to the Redis security group. The Redis endpoint should remain private; only the Node service is internet-facing through an HTTPS Application Load Balancer or equivalent WebSocket-capable proxy.
+
+Build and run the container with:
+
+```bash
+docker build -f Dockerfile.multiplayer -t district-zero-multiplayer .
+docker run --rm -p 8080:8080 \
+  -e AWS_REDIS_URL='rediss://default:password@redis-endpoint:6379' \
+  -e ALLOWED_ORIGINS='https://district-zero-cebu.vercel.app' \
+  district-zero-multiplayer
+```
+
+Use `redis://` only when ElastiCache in-transit encryption is disabled; use `rediss://` when TLS is enabled. The load balancer health check path is `/health`. Enable sticky sessions if available to reduce cross-instance pub/sub traffic, although room state and presence remain shared through Redis.
+
+After the service is reachable through HTTPS, set this Vercel build variable and redeploy the frontend:
+
+```bash
+VITE_MULTIPLAYER_URL=https://multiplayer.example.com/api/ws
+```
+
+The browser automatically converts that HTTPS address to `wss://`. The AWS service must have `ALLOWED_ORIGINS=https://district-zero-cebu.vercel.app`; multiple origins can be supplied as a comma-separated list.
+
 ## Controls
 
-WASD move/drive (A left, D right in cars), Shift sprint, Space jump/handbrake, E interact or enter/exit, move mouse to orbit the camera, and click the game to capture the cursor. On foot, press 1 for fists, 2 for the pistol, or Q to switch; left click to punch or fire, hold right mouse to aim over the shoulder, and press R to reload the pistol. Esc pauses, F5 saves, and F9 loads. Press Enter to expand chat, type a message, and press Enter to send. Choose a display name on the start screen. Use **Customize Character** in the start or pause menu to select a top, hairstyle, and colors. The **Settings** panel saves mouse sensitivity, audio volume, HUD size, and key bindings in this browser. Click an emoji in the expanded chat panel to show a mood above your character for eight seconds. Hold **V** to talk on voice chat once it is enabled, or press **T** to toggle open mic. Colored street markers start activities; the blue marker is the garage. Active jobs display a road route on the minimap, a direction cue, distance, and a destination beam.
+WASD move/drive (A left, D right in cars), Shift sprint, Space jump/handbrake, E interact or enter/exit, move mouse to orbit the camera, and click the game to capture the cursor. On foot, press 1 for fists, 2 for the pistol, or Q to switch; left click to punch or fire, hold right mouse to aim over the shoulder, and press R to reload the pistol. Esc pauses, F5 saves, and F9 loads. In Free-for-All a supply crate is parachuted in from a passing aircraft at intervals; walk into it to take the **bazooka**, then press **G** to bring it up or put it away. A direct rocket hit kills outright and the blast catches anyone standing nearby. The bazooka is never a loadout or armoury choice, and it is lost when you die. Press Enter to expand chat, type a message, and press Enter to send. Choose a display name on the start screen. Use **Customize Character** in the start or pause menu to select a top, hairstyle, and colors. The **Settings** panel saves mouse sensitivity, audio volume, HUD size, and key bindings in this browser. Click an emoji in the expanded chat panel to show a mood above your character for eight seconds. Hold **V** to talk on voice chat once it is enabled, or press **T** to toggle open mic. Colored street markers start activities; the blue marker is the garage. Active jobs display a road route on the minimap, a direction cue, distance, and a destination beam.
 
 Type `ROCKETMAN`, `JUMPJET`, or `OHDUDE` during play without opening chat. `ROCKETMAN` equips a jetpack on the character: WASD moves, Space rises, Ctrl descends, and E removes it (even in the air). Typing `ROCKETMAN` again also removes it. `JUMPJET` spawns and boards a vertical takeoff jet. It starts in hover mode: W rises, S descends, and Up/Down arrows move slowly. Press Numpad 8 or B to switch to forward flight, where W accelerates, S brakes, A/D turns, and Up/Down adjust altitude. Press Numpad 2 or B to return to hover for landing. `OHDUDE` spawns and boards a helicopter: W rises, S descends, Up/Down moves, and A/D turns. Space/Ctrl also rise/descend in aircraft; Shift boosts speed. Press E to leave an aircraft after landing and slowing down. The aircraft are original simplified game meshes. Flights are local gameplay and their position and visible flight mode are shared with other online players.
 

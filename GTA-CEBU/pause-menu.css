@@ -1,0 +1,170 @@
+/* Compact in-game Escape menu. */
+body.pause-menu-open .overlay{display:grid;place-items:center;padding:20px;overflow:hidden;background:#0e0534cc;backdrop-filter:blur(12px)}
+body.pause-menu-open .menu-panel{display:grid;place-items:center;width:100%;height:100%;padding:0;overflow:hidden;background:transparent}
+body.pause-menu-open .menu-panel>*:not(.pause-menu){display:none!important}
+.pause-menu{display:flex;flex-direction:column;gap:14px;width:min(420px,calc(100vw - 32px));padding:34px;border:3px solid #5c5287;border-radius:32px;background:#201846;box-shadow:0 10px 0 #09021f,0 28px 80px #0008;text-align:center}
+.pause-menu[hidden]{display:none}
+.pause-menu small{color:#00e3fd;font:900 10px Rubik;letter-spacing:.18em}
+.pause-menu h2{margin:0 0 12px!important;color:#fff;font:900 30px/1 Rubik!important;letter-spacing:-.03em}
+.pause-menu button{min-height:58px;padding:0 20px;border:0;border-radius:18px;background:#352e5d;color:#fff;box-shadow:0 5px 0 #0d0628;font:900 12px Rubik}
+.pause-menu button.primary{background:#ffb800;color:#28113f;box-shadow:0 5px 0 #9d6200}
+.pause-menu button:active{transform:translateY(4px);box-shadow:0 1px 0 #0d0628}
+.crosshair-options{padding:12px 14px;border-radius:16px;background:#171038;text-align:left}
+.crosshair-options summary{cursor:pointer;color:#bdf4ff;font:900 10px Rubik;letter-spacing:.08em}
+.crosshair-options label{display:grid;grid-template-columns:74px 1fr;align-items:center;gap:10px;margin-top:10px;color:#d5c4ab;font:800 8px Rubik}
+.crosshair-options select,.crosshair-options input{width:100%;min-width:0;accent-color:#00e3fd}
+.crosshair-options select{height:34px;padding:0 8px;border:1px solid #5c5287;border-radius:9px;background:#2a2351;color:#fff;font:800 9px Rubik}
+.crosshair-options input[type="color"]{height:34px;padding:3px;border:1px solid #5c5287;border-radius:9px;background:#2a2351}
+
+/* A room is inspected before its join action is offered. */
+.lobby-room-preview{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:24px;min-height:220px;padding:28px;border:3px solid #5c5287;border-radius:28px;background:#201846;box-shadow:0 8px 0 #09021f}
+.lobby-room-preview[hidden]{display:none}
+.lobby-room-preview small{color:#00e3fd;font:900 9px Rubik}
+.lobby-room-preview h2{margin:5px 0;color:#fff;font:900 28px Rubik}
+.lobby-room-preview p{margin:0;color:#d5c4ab}
+.lobby-room-preview .primary{min-height:58px;padding:0 28px;border:0;border-radius:18px;background:#ffb800;color:#28113f;box-shadow:0 5px 0 #9d6200;font:900 12px Rubik}
+.lobby-room-preview .primary:disabled{opacity:.45}
+@media(max-width:680px){.lobby-room-preview{grid-template-columns:1fr;text-align:center}}
+
+.first-blood{position:fixed;z-index:80;top:29%;left:50%;transform:translate(-50%,-50%) scale(.7) rotate(-2deg);pointer-events:none;white-space:nowrap;color:#d31320;font:900 clamp(42px,8vw,104px)/.9 Rubik,sans-serif;letter-spacing:-.07em;text-transform:uppercase;-webkit-text-stroke:2px #430008;text-shadow:0 3px 0 #68000a,0 8px 0 #210006,4px -3px 0 #ff4b47,-5px 5px 0 #7d000c,0 18px 35px #000}
+.first-blood[hidden]{display:none}
+.first-blood:before,.first-blood:after{content:'';position:absolute;z-index:-1;width:18px;height:18px;border-radius:50%;background:#a8000d;box-shadow:-65px 24px 0 -5px #77000a,72px -18px 0 -4px #c60012,105px 33px 0 -7px #6c0008,-104px -14px 0 -6px #b6000f}
+.first-blood:before{left:8%;top:-7px}.first-blood:after{right:10%;bottom:-12px;transform:scale(.7)}
+.first-blood.show{animation:first-blood-hit 2.3s cubic-bezier(.16,.8,.25,1) both}
+@keyframes first-blood-hit{0%{opacity:0;transform:translate(-50%,-50%) scale(2.2) rotate(-8deg);filter:blur(8px)}12%{opacity:1;transform:translate(-50%,-50%) scale(.88) rotate(2deg);filter:none}22%{transform:translate(-50%,-50%) scale(1.05) rotate(-2deg)}75%{opacity:1}100%{opacity:0;transform:translate(-50%,-65%) scale(1.08) rotate(-2deg)}}
+
+/* Room previews fill and center their backdrop instead of retaining the old
+   narrow card width, which pinned both canvases to the left. */
+.lobby-panel[data-mode="ffa"] #step-character-preview .selected-pirate-art,
+.lobby-panel[data-mode="ffa"] #step-weapon-preview .selected-pirate-art{width:auto;max-width:none;margin:0;justify-self:stretch}
+.lobby-panel[data-mode="ffa"] #step-character-preview .selected-pirate-art canvas,
+.lobby-panel[data-mode="ffa"] #step-weapon-preview .selected-pirate-art canvas{left:0;right:0;margin:auto;transform:none}
+.lobby-panel[data-mode="ffa"] #step-character-preview .selected-pirate-copy,
+.lobby-panel[data-mode="ffa"] #step-weapon-preview .selected-pirate-copy{transform:none}
+
+/* Gameplay controls never leak into menus, matchmaking, or ready rooms. */
+body:not(.gameplay-active) #crosshair,
+body:not(.gameplay-active) #touch,
+body:not(.gameplay-active) .topbar,
+body:not(.gameplay-active) .hud-left,
+body:not(.gameplay-active) .hud-right,
+body:not(.gameplay-active) .radar-cluster,
+body:not(.gameplay-active) .social-panel,
+body:not(.gameplay-active) #combat-hud,
+body:not(.gameplay-active) #ffa-hud,
+body:not(.gameplay-active) #ffa-vitals,
+body:not(.gameplay-active) #ffa-ammo{display:none!important}
+body:not(.ffa-mode) .tb[data-act="armory"]{display:none!important}
+
+/* Clearer child-friendly menu: fewer competing panels, larger targets, and a
+   softer visual rhythm while retaining the approved District Zero palette. */
+.menu-panel{column-gap:28px;background:radial-gradient(circle at 50% 30%,#312064 0,#170d40 48%,#0e0534 100%)}
+.menu-panel:before{opacity:.08}
+.right-sidebar .daily-quests,.right-sidebar .cebu-squad{display:none!important}
+.arcade-nav{box-shadow:0 3px 0 #09021f55}
+.arcade-links{gap:12px}.arcade-links button{padding:0 16px;color:#d9cff2;font-size:11px}
+.arcade-links button:hover{background:#352e5d;color:#fff}
+.featured-mode-card,.main-showcase,.player-card{border-color:#62588d;box-shadow:0 6px 0 #09021f}
+.mission-heading b{font-size:21px;line-height:1.15}.mission-heading span{font-size:10px}
+.featured-mode-card .menu-copy{padding:18px 22px;color:#eee7fa;font-size:12px;line-height:1.55}
+.featured-mode-card .featured-mode-button{min-height:68px;font-size:16px;letter-spacing:0}
+.menu-actions{gap:14px}
+.menu-actions .activity-row,.menu-actions button.deduction-menu-button:not(.featured-mode-button){min-height:112px;border:3px solid #514777!important;border-radius:22px!important;background:#241b4d!important;box-shadow:0 5px 0 #09021f!important}
+.menu-actions .activity-row i{width:66px;height:66px;border-radius:18px}
+.menu-actions .activity-row b{font-size:16px;line-height:1.2}.menu-actions .activity-row b small{font-size:10px}
+.menu-actions .activity-row span,.menu-actions button.deduction-menu-button:not(.featured-mode-button) span{min-width:116px;border-radius:16px;font-size:9px}
+.main-showcase{border-radius:28px}.main-showcase .showcase-tools button{border:2px solid #554b7e;border-radius:16px;background:#2a2351}
+.player-card{border-radius:22px;background:#241a50}.player-stats div{border-color:#443969}
+
+/* Room journey: browse first, inspect second, then join. Busy states cannot be
+   double-clicked and every action uses the same large readable treatment. */
+.lobby-panel{background:radial-gradient(circle at 50% 12%,#342363,#160c3d 52%,#0e0534)}
+.lobby-head{max-width:1400px;margin-inline:auto}.lobby-copy{max-width:1400px;margin-inline:auto;margin-bottom:24px;text-align:center;font-size:13px}
+.lobby-create,.lobby-rooms,.lobby-room-preview{max-width:1200px;margin-left:auto;margin-right:auto}
+.lobby-create{grid-template-columns:auto minmax(240px,1fr) auto;padding:18px 20px;border-radius:22px}
+.lobby-create input{min-height:50px;font-size:14px}.lobby-create button{min-height:50px;font-size:12px!important}
+.lobby-rooms li{min-height:230px;border-radius:24px;background:#211849}
+.lobby-rooms li:before{content:'FREE FOR ALL  •  CEBU IT PARK';height:118px;background:linear-gradient(135deg,#4b3a88,#176b8a);color:#fff;font:900 14px Rubik;letter-spacing:.08em}
+.lobby-rooms li:nth-child(even):before{background:linear-gradient(135deg,#5c3c8e,#a64269)}
+.lobby-rooms li>b{font-size:18px}.lobby-rooms li small{font-size:10px}.lobby-rooms li>button{min-height:52px;border-radius:16px;font-size:11px}
+.lobby-room-preview{min-height:250px;border-radius:26px}.lobby-room-preview h2{font-size:32px}.lobby-room-preview p{font-size:13px;line-height:1.6}.lobby-room-preview .primary{min-width:190px;font-size:12px}
+.lobby-browser-busy .lobby-room-preview{opacity:.55;pointer-events:none}
+.lobby-loading{max-width:1200px;margin:30px auto}
+@media(max-width:900px){.menu-panel{column-gap:16px}.lobby-create{grid-template-columns:1fr}.lobby-create:before{text-align:center}.lobby-rooms{grid-template-columns:1fr}}
+
+/* ======================================================================
+   Viewport-safe child UI. Screens never create page scroll; only content
+   collections scroll inside their own clearly bounded area.
+   ====================================================================== */
+html,body,#app{width:100%;height:100%;height:100dvh;overflow:hidden;overscroll-behavior:none}
+#app{position:fixed;inset:0}
+.overlay{position:fixed;inset:0;width:100%;height:100%;height:100dvh;overflow:hidden}
+.menu-panel{width:100%;height:100%;max-height:100%;overflow:hidden;box-sizing:border-box}
+
+/* Loader remains a single full-screen composition at every desktop height. */
+#boot{width:100%;height:100%;height:100dvh;min-height:0;box-sizing:border-box;overflow:hidden}
+#boot-scene{min-height:0!important}
+#boot-lower{min-height:0}
+
+/* Main menu columns fit the available height instead of extending the page. */
+.menu-panel{grid-template-rows:minmax(0,.58fr) minmax(0,.42fr);align-items:stretch}
+.menu-intro{grid-row:1;display:flex;min-height:0;flex-direction:column}
+.mission-heading{flex:none}.featured-mode-card{display:flex;min-height:0;flex:1;flex-direction:column}
+.mission-art{min-height:0;flex:1}.featured-mode-card .menu-copy{flex:none}.featured-mode-card .featured-mode-button{flex:none}
+.menu-actions{grid-row:2;align-self:stretch;max-height:none;overflow:hidden}
+.main-showcase{grid-row:1/3;min-height:0;height:100%}
+.right-sidebar{grid-row:1/3;height:100%;overflow:hidden}.right-sidebar .account-bar{flex:none}
+
+/* Lobby browser: header and create action stay fixed; room cards are the list. */
+.lobby-panel,body.ready-room-open .lobby-panel{height:calc(100dvh - 76px);overflow:hidden;box-sizing:border-box}
+#lobby-browser{display:grid;grid-template-rows:auto auto auto minmax(0,1fr);height:100%;min-height:0}
+#lobby-browser>.lobby-head,#lobby-browser>.lobby-copy,#lobby-browser>.lobby-create{flex:none}
+.lobby-head{grid-row:1}.lobby-copy{grid-row:2}.lobby-create{grid-row:3}.lobby-rooms,.lobby-empty,.lobby-loading{grid-row:4}
+.lobby-rooms{min-height:0;overflow:auto;overscroll-behavior:contain;padding:4px 4px 14px;scrollbar-width:thin;scrollbar-color:#5c5287 transparent}
+.lobby-empty{align-self:start}
+.lobby-loading{grid-row:4;align-self:start}
+.lobby-room-preview{grid-row:3/5;align-self:stretch;width:100%;height:100%;box-sizing:border-box}
+
+/* Ready room keeps navigation and the primary action visible. Selection grids
+   are the only portions allowed to move when the viewport is short. */
+#lobby-room{display:grid;grid-template-rows:auto minmax(0,1fr) auto;height:100%;min-height:0}
+#lobby-room[hidden]{display:none}
+.ready-room-head{min-height:0;margin-bottom:14px}
+.ready-room-layout{min-height:0;height:100%;padding:0;overflow:hidden;align-items:stretch}
+.pirate-select,.selected-pirate,.crew-ready{min-height:0;height:100%;box-sizing:border-box}
+#step-character-select,#step-weapon-select,.crew-ready{display:flex;flex-direction:column;overflow:hidden}
+#lobby-character-grid,#lobby-gun-grid,.lobby-members{min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#5c5287 transparent}
+.lobby-actions{flex:none;margin:14px auto 7px}
+.lobby-panel[data-mode="ffa"] #step-character-preview,.lobby-panel[data-mode="ffa"] #step-weapon-preview{min-height:0;height:100%}
+
+/* Dialogs and end screens stay centered without creating document scroll. */
+.account-modal,.ffa-armory{position:fixed;inset:0;overflow:hidden}
+.account-card,.armory-panel,.ffa-results{max-height:calc(100dvh - 32px);box-sizing:border-box;overflow:hidden}
+.armory-grid,#ffa-final-standings,.ffa-scoreboard{overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#5c5287 transparent}
+
+/* Short laptops and landscape tablets prioritize play choices over decoration. */
+@media(max-height:900px) and (min-width:681px){
+  .menu-panel{padding-top:92px;padding-bottom:14px;gap:14px}
+  .server-strip{top:77px;height:38px}.mission-heading{min-height:38px;margin-bottom:8px}.mission-heading b{font-size:17px}
+  .mission-art{min-height:150px}.mission-art strong{font-size:21px}.featured-mode-card .menu-copy{padding:10px 15px;font-size:10px;line-height:1.4}.featured-mode-card .featured-mode-button{min-height:50px;margin-bottom:12px;font-size:13px}
+  .menu-actions{gap:7px}.menu-actions .activity-row,.menu-actions button.deduction-menu-button:not(.featured-mode-button){min-height:76px;padding:8px}.menu-actions .activity-row i{width:48px;height:48px;background-size:25px}.menu-actions .activity-row b{font-size:13px}.menu-actions .activity-row b small{margin-top:3px;font-size:8px}.menu-actions .activity-row span,.menu-actions button.deduction-menu-button:not(.featured-mode-button) span{min-width:88px;padding:8px 10px}
+  .main-showcase .showcase-tools{bottom:14px}.showcase-tools button{min-height:42px}.main-showcase .rotate-hint{bottom:76px}
+  .player-card{padding:13px}.player-badge{width:45px;height:45px}.player-stats div{padding:8px 3px}.player-stats b{font-size:16px}
+  .lobby-panel{padding-top:16px;padding-bottom:12px}.lobby-head{margin-bottom:4px}.lobby-head .eyebrow{font-size:28px}.lobby-copy{margin-bottom:12px}.lobby-create{padding:10px 14px;margin-bottom:12px}.lobby-rooms li{min-height:178px;padding-top:112px}.lobby-rooms li:before{height:92px}
+  .ready-room-head{margin-bottom:10px}.lobby-panel[data-mode="ffa"] #step-character-preview,.lobby-panel[data-mode="ffa"] #step-weapon-preview{min-height:0}.lobby-panel[data-mode="ffa"] .lobby-actions{margin-top:10px}.lobby-panel[data-mode="ffa"] .lobby-actions .primary{height:56px}
+}
+
+/* Phones use one task per screen; supporting panels are removed rather than
+   forcing a child to hunt through a long page. */
+@media(max-width:680px){
+  #boot{display:grid;padding:76px 12px 12px;overflow:hidden}#boot-status{display:none}#boot-lower{display:none}#boot-scene{height:auto;min-height:0}
+  .menu-panel{display:grid;grid-template-columns:1fr;grid-template-rows:minmax(0,1fr);padding:76px 12px 12px;overflow:hidden}
+  .menu-intro{display:none}.main-showcase{grid-column:1;grid-row:1;height:42%;min-height:0;margin:0}.right-sidebar{display:none}.menu-actions{grid-column:1;grid-row:1;align-self:end;max-height:55%;overflow:hidden}
+  .menu-actions .activity-row,.menu-actions button.deduction-menu-button:not(.featured-mode-button){min-height:72px}.menu-actions .activity-row i{width:46px;height:46px}.menu-actions .activity-row b{font-size:12px}.menu-actions .activity-row b small{font-size:8px}.menu-actions .activity-row em{display:none}
+  .lobby-panel,body.ready-room-open .lobby-panel{inset:66px 0 0;height:calc(100dvh - 66px);padding:12px}
+  .lobby-head{gap:8px}.lobby-head .eyebrow{font-size:18px}.lobby-copy{display:none}.lobby-create{padding:10px;margin-bottom:10px}.lobby-rooms li{min-height:168px;padding-top:100px}.lobby-rooms li:before{height:82px;font-size:10px}
+  .ready-room-head{grid-template-columns:auto 1fr;gap:8px}.ready-room-head h2{font-size:17px}.lobby-steps{margin:0}.ready-room-layout{display:grid;grid-template-columns:1fr}.crew-ready{display:none!important}.selected-pirate{min-height:0!important}.lobby-actions{position:static;padding:8px 0 4px;margin:0;background:transparent}
+  .lobby-panel[data-mode="ffa"] #step-character-preview,.lobby-panel[data-mode="ffa"] #step-weapon-preview{min-height:0}
+  .lobby-panel[data-mode="ffa"] .lobby-actions .primary{min-width:0;height:54px}
+  .pause-menu{max-height:calc(100dvh - 24px);padding:20px}.pause-menu button{min-height:50px}
+}

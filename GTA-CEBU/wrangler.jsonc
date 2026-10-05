@@ -1,0 +1,22 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "district-zero-multiplayer",
+  "main": "cloudflare/worker.js",
+  "compatibility_date": "2026-09-01",
+  "durable_objects": {
+    "bindings": [
+      { "name": "DISTRICT", "class_name": "DistrictCoordinator" }
+    ]
+  },
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["DistrictCoordinator"] }
+  ],
+  // SUPABASE_SECRET_KEY is deliberately NOT here -- it is set with
+  // `wrangler secret put SUPABASE_SECRET_KEY` so it is encrypted and never
+  // sits in source control.
+  "vars": {
+    "SUPABASE_URL": "https://vamnbzywsuzjmvafeshj.supabase.co",
+    "ALLOWED_ORIGINS": "https://district-zero-cebu.vercel.app,https://district-zero.district-zero.workers.dev,https://dz.jmgaming.site"
+  },
+  "observability": { "enabled": true }
+}

@@ -77,6 +77,7 @@ export class VoiceChatManager {
     this.levelClock = 0;
     this.topologyClock = 0;
     this.rosterDirty = true;
+    this.communicationAllowed = true;
 
     this.hud = new VoiceHUD({
       onEnable: () => void this.enable(),
@@ -157,6 +158,17 @@ export class VoiceChatManager {
     this.syncTransmission();
   }
 
+  setCommunicationAllowed(allowed) {
+    this.communicationAllowed = allowed !== false;
+    if (!this.communicationAllowed) {
+      this.pttHeld = false;
+      this.openMic = false;
+      this.openMicRequested = false;
+      this.hud.setOpenMic(false);
+    }
+    this.syncTransmission();
+  }
+
   toggleOpenMic() {
     if (!this.enabled) {
       this.openMicRequested = !this.openMicRequested;
@@ -173,6 +185,7 @@ export class VoiceChatManager {
   // ----------------------------------------------------------- microphone
 
   async enable() {
+    if (!this.communicationAllowed) return;
     if (this.enabled || this.starting) return;
     if (!navigator.mediaDevices?.getUserMedia || typeof RTCPeerConnection !== 'function') {
       // Also the path for an insecure origin, where mediaDevices is absent.
@@ -261,6 +274,7 @@ export class VoiceChatManager {
   // ------------------------------------------------------------ push to talk
 
   handleKeyDown(event) {
+    if (!this.communicationAllowed) return;
     if (event.code === VOICE_OPEN_MIC_CODE) {
       if (typingSomewhere() || this.network.isTyping() || this.isEnteringCheat() || this.isRebinding()) return;
       event.preventDefault();
@@ -281,7 +295,7 @@ export class VoiceChatManager {
   }
 
   syncTransmission() {
-    const shouldTransmit = !!(this.enabled && this.micTrack && !this.selfMuted && !this.suspended && (this.openMic || this.pttHeld));
+    const shouldTransmit = !!(this.communicationAllowed && this.enabled && this.micTrack && !this.selfMuted && !this.suspended && (this.openMic || this.pttHeld));
     if (this.talking === shouldTransmit) { this.refreshStatus(); return; }
     this.talking = shouldTransmit;
     if (this.micTrack) this.micTrack.enabled = shouldTransmit;

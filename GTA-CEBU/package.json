@@ -5,15 +5,21 @@
   "type": "module",
   "scripts": {
     "dev": "node --env-file-if-exists=.env.local server.js",
+    "dev:local": "node --env-file=.env.gta-local server.js",
     "build": "vite build",
+    "test": "node --test",
+    "check": "node --check src/game.js && node --check src/world.js && node --check src/multiplayer.js && node --check cloudflare/worker.js && npm test && npm run build",
     "preview": "node --env-file-if-exists=.env.local server.js --production",
     "start": "node --env-file-if-exists=.env.local server.js --production",
+    "start:multiplayer": "node --env-file-if-exists=.env.local aws-multiplayer.js",
     "share": "bash tools/share-tailnet.sh",
     "share:stop": "bash tools/share-tailnet.sh --stop"
   },
   "description": "Original browser city sandbox with shared players and chat",
   "dependencies": {
     "ioredis": "^6.0.0",
+    "pg": "^8.23.0",
+    "postgres": "^3.4.9",
     "three": "^0.186.0",
     "ws": "^8.21.3"
   },

@@ -10,6 +10,10 @@ export const settings={
   sensitivity:limit(saved.sensitivity,.4,2,1),
   volume:limit(saved.volume,0,1,.8),
   hudScale:limit(saved.hudScale,.8,1.4,1),
+  crosshairSize:limit(saved.crosshairSize,12,42,22),
+  crosshairOpacity:limit(saved.crosshairOpacity,.25,1,.9),
+  crosshairShape:['plus','dot','ring'].includes(saved.crosshairShape)?saved.crosshairShape:'plus',
+  crosshairColor:/^#[0-9a-f]{6}$/i.test(saved.crosshairColor||'')?saved.crosshairColor:'#eafcff',
   bindings:{...defaultBindings}
 };
 if(saved.bindings&&typeof saved.bindings==='object'){

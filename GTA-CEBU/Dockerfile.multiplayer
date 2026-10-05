@@ -1,0 +1,16 @@
+FROM node:22-alpine AS dependencies
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
+
+FROM node:22-alpine
+ENV NODE_ENV=production PORT=8080 HOST=0.0.0.0
+WORKDIR /app
+COPY --from=dependencies /app/node_modules ./node_modules
+COPY package.json ./
+COPY aws-multiplayer.js ./
+COPY api ./api
+COPY src/map-config.js src/appearance.js ./src/
+USER node
+EXPOSE 8080
+CMD ["node", "aws-multiplayer.js"]

@@ -2,12 +2,49 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#0b1016">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#111a20">
   <title>District Zero — City Stories</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="pause-menu.css">
+  <!-- Non-blocking: the page paints in the fallback face and swaps when the
+       webfont lands, instead of holding first paint on a third-party request. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" media="print" onload="this.media='all'"
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Rubik:wght@600;700;800;900&display=swap">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Rubik:wght@600;700;800;900&display=swap"></noscript>
 </head>
 <body>
+  <!-- Painted from inline CSS before the bundle is even parsed, so the first
+       thing a player sees is progress rather than a frozen white page. -->
+  <div id="boot" role="status" aria-live="polite">
+    <style>
+      #boot{position:fixed;inset:0;z-index:999;display:grid;grid-template-rows:auto minmax(420px,1fr) auto;gap:22px;background:#130a39;color:#e6deff;font:700 13px/1.5 'Plus Jakarta Sans',system-ui,sans-serif;padding:88px 28px 24px;overflow:hidden}
+      #boot[hidden]{display:none}
+      #boot-nav{position:fixed;z-index:2;inset:0 0 auto;height:68px;display:flex;align-items:center;gap:24px;padding:0 28px;border-bottom:2px solid #2d225d;background:#0e0534}
+      #boot-brand{display:flex;align-items:center;gap:12px;margin-right:auto}#boot-logo{display:grid;place-items:center;width:42px;height:42px;border-radius:11px;background:#ffb800;color:#130a39;font:900 16px Rubik;box-shadow:0 4px 0 #9d6200;transform:rotate(-3deg)}
+      #boot h1{margin:0;font:900 16px Rubik;color:#ffdca1}#boot-links{display:flex;gap:26px;color:#d5c4ab;font:800 11px Rubik}#boot-links b{padding:10px 20px;border-radius:999px;background:#ffb800;color:#27103e;box-shadow:0 4px 0 #9d6200}#boot-wallet{display:flex;gap:9px}#boot-wallet span{padding:9px 13px;border-radius:999px;background:#201846;color:#ffdca1}
+      #boot-status{display:flex;align-items:center;gap:16px;width:100%;margin:0;padding:18px 22px;border-radius:30px;background:#201846}#boot-status span{padding:9px 14px;border-radius:999px;background:#2a2351}#boot-status b{margin-right:auto;color:#ffdca1;font:900 16px Rubik}#boot-status strong{padding:11px 20px;border-radius:18px;background:#ffb800;color:#28103e;font:900 13px Rubik}
+      #boot-scene{position:relative;width:100%;height:100%;min-height:420px;border-radius:32px;background:linear-gradient(#130a3933,#0e0534d9),url('https://lh3.googleusercontent.com/aida-public/AB6AXuBygUa2PQtpqX1TFm8xfzUJGtRfTDZKNNWBdEZG0GDn5Ja_XbzAOQxKCCqk3rBntwCaxhmh_B-oB1k5_o-vMCJFeD9bJcMVsUBhEEJ8IraW9N9ErWFjWWLXDC8LChsU9ywZyYhYK2RLbM_YvsFx32HKrpDIHw7j7R1EzGUg9u2cAskupt_jB3X5Y1129usB7SXtGWnguGTZAs4bJiyA5mN0Tp3yXT-WeNVGaXevZ_SkV4sbfOkNV9GUjg') center/cover;box-shadow:0 8px 0 #09021f;overflow:hidden}
+      #boot-scene-copy{position:absolute;left:30px;right:30px;bottom:78px;text-align:left}#boot-scene-copy small{color:#bdf4ff}#boot-scene-copy h2{margin:8px 0 5px;font:900 clamp(30px,4vw,55px) Rubik;letter-spacing:-.05em;color:#fff}#boot-scene-copy h2 em{color:#ffdca1;font-style:normal}#boot-scene-copy p{margin:0;max-width:760px;color:#d5c4ab;font-size:15px}
+      #boot-progress{position:absolute;left:30px;right:30px;bottom:24px}#boot-bar{width:100%;height:22px;border:3px solid #09021f;border-radius:999px;background:#0e0534;overflow:hidden}
+      #boot-fill{display:block;height:100%;width:0;background:linear-gradient(90deg,#00e3fd,#ffb800);
+        transition:width .3s ease}
+      #boot-note{margin-top:7px;color:#bdf4ff;font:800 10px Rubik;text-align:left}#boot-lower{display:grid;grid-template-columns:1.4fr .8fr;gap:20px;width:100%;margin:0}#boot-roster,#boot-tip{padding:18px 22px;border-radius:28px;background:#201846;box-shadow:0 6px 0 #09021f;text-align:left}#boot-roster h3,#boot-tip b{margin:0;color:#fff;font:900 15px Rubik}#boot-players{display:flex;gap:12px;margin-top:12px}#boot-players span{display:grid;place-items:center;width:54px;height:54px;border:3px solid #514777;border-radius:18px;background:#352e5d;font-size:22px}#boot-players span:first-child{border-color:#ffb800}#boot-tip{color:#d5c4ab}#boot-tip b{display:block;margin-bottom:10px;color:#ffdca1}
+      @media(max-width:760px){#boot{display:block;padding:78px 14px 18px;overflow:auto}#boot-links,#boot-wallet{display:none}#boot-status{flex-wrap:wrap;margin-bottom:18px}#boot-status b{width:100%}#boot-scene{height:470px}#boot-scene-copy{bottom:90px}#boot-lower{grid-template-columns:1fr;margin-top:20px}#boot-players span:nth-child(n+6){display:none}}
+    </style>
+    <header id="boot-nav"><div id="boot-brand"><span id="boot-logo">DZ</span><h1>DISTRICT ZERO</h1></div><nav id="boot-links"><b>Play</b><span>Customize &amp; Locker</span><span>Quests</span><span>IT Park Map</span><span>Store</span></nav><div id="boot-wallet"><span>🪙 2,450</span><span>💎 85</span><span>● SAFE VOICE: ON</span></div></header>
+    <div id="boot-status"><span>🔵 SANDBOX MATCHMAKING</span><b>▦ CEBU IT PARK DISTRICT</b><span>◉ PING: 24 ms</span><span>🎮 FREE-FOR-ALL ROAM</span><strong>SEARCHING MATCH&nbsp; 05:32</strong></div>
+    <section id="boot-scene"><div id="boot-scene-copy"><small>◉ MAP LOADED PREVIEW</small><h2>CEBU IT PARK <em>FREE-ROAM</em></h2><p>Explore rooftop jump pads, race around Skyrise Alley, grab Golden Gears, and solve detective micro-mysteries with friendly cadets!</p></div><div id="boot-progress"><div id="boot-bar"><i id="boot-fill"></i></div><div id="boot-note">BUFFERING GAME ASSETS…</div><button id="boot-retry" type="button" hidden style="margin-top:10px;padding:9px 18px;border:0;border-radius:999px;background:#ffb800;color:#28103e;font:900 10px Rubik">RETRY DOWNLOAD</button></div></section>
+    <div id="boot-lower"><section id="boot-roster"><h3>PLAYERS READY IN DISTRICT LOBBY <span style="color:#bdf4ff">(8/10 CADETS)</span></h3><div id="boot-players"><span>🕵️</span><span>🐾</span><span>🚀</span><span>🤖</span><span>⚡</span><span>⭐</span><span>🐧</span><span>☁️</span><span>◎</span><span>◎</span></div></section><div id="boot-tip"><b>💡 KID TIP OF THE MATCH</b>Collect hidden Golden Gears around IT Park to unlock super bouncy jump boots for your car!</div></div>
+  </div>
   <main id="app" aria-label="District Zero game">
     <canvas id="game" aria-label="Third-person 3D city game"></canvas>
     <div id="vignette"></div>
@@ -49,18 +86,211 @@
     <div id="shot-flash" aria-hidden="true"></div>
     <div id="damage-flash" aria-hidden="true"></div>
     <div id="hit-marker" aria-hidden="true">×</div>
+    <div id="headshot-marker" aria-hidden="true">HEADSHOT</div>
+    <div id="damage-numbers" aria-hidden="true"></div>
     <div id="miss-marker" aria-hidden="true">○</div>
     <div id="crosshair" hidden>＋</div>
+    <!-- Scoped sniper view: the lens masks the world, the reticle sits in it. -->
+    <div id="ffa-scope" class="ffa-scope" hidden aria-hidden="true">
+      <div class="scope-mask"></div><div class="scope-glass"></div>
+      <div class="scope-lens"><i class="scope-h"></i><i class="scope-v"></i><b class="scope-dot"></b>
+        <span class="scope-tick t1"></span><span class="scope-tick t2"></span><span class="scope-tick t3"></span></div>
+      <div class="scope-zoom" id="ffa-scope-zoom">2.5x</div>
+    </div>
+    <!-- Combat readout, laid out like the shooters this borrows from:
+         health at the lower left, the weapon and its ammunition lower right. -->
+    <div id="ffa-vitals" class="ffa-vitals" hidden>
+      <div class="vitals-health"><span id="ffa-health">100</span><small>HP</small>
+        <div class="vitals-bar"><i id="ffa-health-fill"></i></div></div>
+    </div>
+    <div id="ffa-ammo" class="ffa-ammo" hidden>
+      <div class="ammo-weapon" id="ffa-weapon-name">SMG</div>
+      <div class="ammo-count"><b id="ffa-mag">30</b><span id="ffa-reserve">/ 90</span></div>
+      <div class="ammo-hint" id="ffa-ammo-hint">R RELOAD · 1-4 SWITCH</div>
+    </div>
+    <section id="ffa-hud" class="ffa-hud" hidden aria-live="polite"><div><small id="ffa-phase">FREE-FOR-ALL</small><strong id="ffa-timer">05:00</strong></div><div><small>LEADER</small><strong id="ffa-leader">0 KILLS</strong></div></section>
+    <ol id="ffa-scoreboard" class="ffa-scoreboard" hidden aria-label="Free-for-All scoreboard"></ol>
+    <div id="ffa-kill-feed" class="ffa-kill-feed" aria-live="polite"></div>
+    <div id="first-blood" class="first-blood" hidden aria-live="assertive">FIRST BLOOD</div>
+    <div id="touch" class="touch" hidden aria-hidden="true">
+      <div id="touch-stick-zone" class="touch-stick-zone">
+        <div id="touch-stick" class="touch-stick"><i></i></div>
+      </div>
+      <div class="touch-right">
+        <button class="tb tb-fire" data-act="fire" type="button" aria-label="Fire"><i class="ic ic-fire"></i></button>
+        <button class="tb tb-aim"  data-act="aim"  type="button" aria-label="Aim"><i class="ic ic-aim"></i></button>
+        <button class="tb" data-act="jump" type="button" aria-label="Jump"><i class="ic ic-jump"></i></button>
+        <button class="tb" data-act="reload" type="button" aria-label="Reload"><i class="ic ic-reload"></i></button>
+        <button class="tb tb-interact" data-act="interact" type="button" aria-label="Interact"><span class="kb">E</span></button>
+      </div>
+      <div class="touch-weapons">
+        <button class="tb tb-slot" data-act="swap" type="button" aria-label="Swap weapon"><span class="gl">⇄</span></button>
+        <button class="tb tb-slot ffa-only" data-act="armory" type="button" aria-label="Armoury"><i class="ic ic-armory"></i></button>
+        <button class="tb tb-slot ffa-only" data-act="board" type="button" aria-label="Scoreboard"><i class="ic ic-board"></i></button>
+      </div>
+    </div>
+    <div id="account-modal" class="account-modal" hidden role="dialog" aria-modal="true" aria-labelledby="account-title">
+      <div class="account-card">
+        <button id="account-close" type="button" class="account-x" aria-label="Close">&times;</button>
+        <div class="eyebrow">DISTRICT ZERO</div>
+        <h2 id="account-title">SIGN IN</h2>
+        <p id="account-blurb">Your name, your progress, on any device.</p>
+        <form id="account-form" autocomplete="on">
+          <label>NAME<input id="account-field-name" type="text" maxlength="20" autocomplete="username" required></label>
+          <label id="account-email-row" hidden>EMAIL <small>(optional)</small><input id="account-field-email" type="email" autocomplete="email"></label>
+          <label>PASSWORD<input id="account-field-password" type="password" minlength="8" autocomplete="current-password" required></label>
+          <p id="account-error" class="account-error" hidden></p>
+          <button id="account-submit" type="submit" class="primary">SIGN IN</button>
+        </form>
+        <p class="account-swap">
+          <span id="account-swap-text">No account yet?</span>
+          <button id="account-swap" type="button">CREATE ONE</button>
+        </p>
+      </div>
+    </div>
+    <div id="death-screen" class="death-screen" hidden aria-live="assertive">
+      <div class="death-splashes"></div>
+      <div class="death-copy"><strong>YOU'VE BEEN KILLED!</strong><span id="death-by"></span></div>
+    </div>
+    <div id="ffa-armory" class="ffa-armory" hidden>
+      <div class="armory-panel">
+        <header><div><span class="eyebrow">ARMORY</span><h2>SELECT WEAPON</h2></div><button id="armory-close" type="button" class="lobby-ghost-btn">CLOSE ✕</button></header>
+        <div id="armory-grid" class="armory-grid"></div>
+        <div class="armory-preview"><canvas id="armory-preview-canvas" aria-label="Weapon preview"></canvas><div><strong id="armory-name">—</strong><p id="armory-stats"></p></div></div>
+        <p class="armory-hint">TAB closes · click a weapon to equip · hold C for the scoreboard</p>
+      </div>
+    </div>
+    <section id="ffa-results" class="ffa-results" hidden><div class="eyebrow">MATCH COMPLETE</div><h2 id="ffa-result-title">FINAL STANDINGS</h2><ol id="ffa-final-standings"></ol><p id="ffa-reward" class="ffa-reward" hidden></p><p>Returning to the ready room…</p></section>
+    <aside id="deduction-lobby-card" class="deduction-lobby-card" hidden>
+      <div class="eyebrow">SOCIAL DEDUCTION</div><strong>ENTER THE CIRCLE</strong>
+      <p>Press E to enter a new map. One player is the impostor.</p>
+    </aside>
+    <section id="deduction-role" class="deduction-role" hidden aria-live="assertive"><small>YOUR ROLE</small><strong id="deduction-role-name">CREWMATE</strong><p id="deduction-role-copy"></p></section>
+    <section id="ship-status" class="ship-status" hidden><span id="ship-room">CENTRAL PLAZA</span><b id="task-meter-label">TASKS 0 / 4</b><div><i id="task-meter-fill"></i></div><ul id="ship-task-list"></ul><small id="sabotage-status"></small></section>
+    <section id="task-panel" class="task-panel" hidden aria-label="Task console"><div class="eyebrow" id="task-room">POWER YARD</div><h2 id="task-title">RESTORE GRID</h2><p id="task-instruction"></p><div id="task-controls" class="task-controls"></div><button id="task-close" type="button">CANCEL</button></section>
+    <section id="meeting-panel" class="meeting-panel" hidden aria-label="Emergency meeting">
+      <div class="meeting-head">
+        <div class="eyebrow">EMERGENCY MEETING</div>
+        <div id="meeting-result" class="meeting-result" hidden></div>
+        <button id="meeting-toggle" class="meeting-toggle" type="button" aria-expanded="true" aria-controls="meeting-body"><span id="meeting-toggle-label">MINIMIZE</span></button>
+      </div>
+      <div class="meeting-body" id="meeting-body"><h2>WHO IS THE KILLER?</h2><p id="meeting-copy">Vote for the player you suspect.</p><div id="vote-options" class="vote-options"></div></div>
+    </section>
     <div id="overlay" class="overlay">
       <div class="menu-panel">
-        <div class="eyebrow">AN ORIGINAL URBAN SANDBOX</div>
-        <h1>DISTRICT<br><em>ZERO</em></h1>
-        <p class="menu-copy">Take jobs, earn cash, upgrade your ride, and explore a city that reacts to your choices.</p>
-        <label class="name-field" for="player-name">YOUR DISPLAY NAME<input id="player-name" type="text" maxlength="20" autocomplete="nickname" placeholder="Player"></label>
-        <div class="menu-actions"><button id="newBtn" class="primary">NEW GAME <span>→</span></button><button id="continueBtn" disabled>CONTINUE <span>↗</span></button><button id="resumeBtn" hidden>RESUME <span>→</span></button><button id="customizeBtn" type="button">CUSTOMIZE CHARACTER <span>✦</span></button><button id="mapBtn" type="button">IT PARK MAP <span>⌖</span></button><button id="settingsBtn" type="button">SETTINGS <span>⚙</span></button><button id="saveBtn" hidden>SAVE GAME <span>↓</span></button><button id="loadBtn" hidden>LOAD GAME <span>↗</span></button></div>
-        <div id="district-map-panel" class="district-map-panel" hidden><div class="eyebrow">CEBU IT PARK · NORTH UP</div><p>Office towers, dining streets, Garden Bloc, and your current route.</p><canvas id="district-map" width="700" height="880" aria-label="Cebu IT Park streets and landmarks"></canvas><p class="map-legend">Gold: courier · Mint: fares · Purple: circuit · Blue: garage</p><p>Geography from <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>. Stylized exteriors and landscaping. <a href="/data/cebu-it-park.json" download>Map data (ODbL)</a></p></div><div id="settings-panel" class="settings-panel" hidden><div class="eyebrow">GAME SETTINGS</div><label>Mouse sensitivity <output id="sensitivity-value"></output><input id="sensitivity-setting" type="range" min="0.4" max="2" step="0.1"></label><label>Audio volume <output id="volume-value"></output><input id="volume-setting" type="range" min="0" max="1" step="0.05"></label><label>HUD size <output id="hud-size-value"></output><input id="hud-size-setting" type="range" min="0.8" max="1.4" step="0.05"></label><div class="eyebrow">KEY BINDINGS</div><p>Choose an action, then press a key. Esc cancels.</p><div id="key-bindings" class="key-bindings"></div></div>
+        <nav class="arcade-nav" aria-label="Main navigation">
+          <div class="arcade-brand"><span>DZ</span><b>DISTRICT ZERO<small>CEBU CITY STORIES</small></b></div>
+          <div class="arcade-links"><strong>PLAY</strong><button class="next-version">CUSTOMIZE &amp; LOCKER</button><button class="next-version">QUESTS</button><button class="next-version">IT PARK MAP</button><button class="next-version">STORE</button></div>
+          <div class="arcade-wallet"><span>🪙 <b id="menu-money">0</b></span><span>⭐ <b id="menu-xp">0</b></span><span class="safe-voice">🎙 SAFE VOICE</span></div>
+        </nav>
+        <div class="server-strip"><b>CEBU IT PARK SANDBOX SERVER #01</b><span>☀ TROPICAL DAYLIGHT · 29°C · GARDEN BLOC ZONE</span><span>♙ 1,842 CADETS ONLINE</span><strong>♢ SAFE MODE SHIELD: ACTIVE</strong></div>
+        <section class="menu-intro">
+          <div class="mission-heading"><b>🎮 SELECT MISSION MODE</b><span>Season 1: IT Park Takeover</span></div>
+          <div class="featured-mode-card">
+            <div class="mission-art ffa-feature"><div class="mission-tags"><span>🔥 POPULAR</span><span>♟ 4–8 PLAYERS</span><span>5m ROUNDS</span></div><strong>FREE FOR ALL</strong><small>FOAM BLASTER SHOWDOWN</small></div>
+            <p class="menu-copy" id="menu-copy">Enter the Central Garden arena, choose your loadout, and compete against other cadets in a fast, kid-safe blaster match.</p>
+            <button id="ffaBtn" class="featured-mode-button" type="button">▶ PLAY FREE FOR ALL NOW</button>
+          </div>
+        </section>
+        <section class="main-showcase" aria-label="Cebu open world">
+          <span class="showcase-chip">♢ ROOKIE DETECTIVE OUTFIT</span><span class="showcase-ride">🛵 TURBO KID CRUISER #01</span>
+          <canvas id="menu-character-preview" aria-label="Animated rotatable Sharky preview"></canvas>
+          <div class="rotate-hint"><b>↻ &nbsp; DRAG TO ROTATE &nbsp; ↺</b></div>
+          <div class="showcase-tools"><button class="next-version">♙ LOCKER</button><button class="next-version">☻ EMOTES</button><button class="next-version">🎮 GADGETS</button></div>
+        </section>
+        <!-- An account is required so progression belongs to a player rather
+             than to one browser's editable local storage. -->
+        <div class="right-sidebar">
+        <div id="account-bar" class="account-bar">
+          <div id="account-out" class="guest-row">
+            <div>
+              <strong>SIGN IN REQUIRED</strong>
+              <small>Your Cebu progress is saved to your account.</small>
+            </div>
+            <button id="account-open" type="button" class="guest-signin">SIGN IN</button>
+          </div>
+
+          <!-- Signed in: the menu becomes the player's own card. -->
+          <div id="account-in" class="player-card" hidden>
+            <div class="player-card-head">
+              <span class="player-badge"><small>LV</small><b id="account-level">1</b></span>
+              <div class="player-id">
+                <small>CADET DETECTIVE</small>
+                <strong id="account-name">—</strong>
+              </div>
+              <button id="account-signout" type="button" class="lobby-ghost-btn">SIGN OUT</button>
+            </div>
+            <div class="player-xp">
+              <div class="account-bar-track"><i id="account-bar-fill"></i></div>
+              <span id="account-exp" class="account-exp">0 / 400 XP</span>
+            </div>
+            <p class="player-unlock">Reach Level 2 to unlock Cebu Jeepney Kart!</p>
+            <div class="player-stats">
+              <div><b id="account-points">0</b><small>POINTS</small></div>
+              <div><b id="stat-matches">0</b><small>MATCHES</small></div>
+              <div><b id="stat-kd">0.00</b><small>K / D</small></div>
+              <div><b id="stat-wins">0</b><small>WINS</small></div>
+            </div>
+          </div>
+        </div>
+        <aside class="daily-quests" aria-label="Daily quests"><div><span>☑ DAILY QUESTS</span><b>RESETS IN 6H</b></div><p>⚙ Find 3 Golden Gears <strong>0/3</strong><small>Around IT Park plaza</small></p><p>◉ High-five 2 Cadets <strong>1/2</strong><small>Use emote wheel</small></p><p>🛵 Ride Scooter 500m <strong>0/1</strong><small>On Garden Bloc loop</small></p></aside>
+        <aside class="cebu-squad"><div><b>♟ CEBU SQUAD</b><button class="next-version">♙+</button></div><p><i>NF</i><span><b>NeonFox_PH</b><small>In Lobby #2</small></span><button class="next-version">Invite</button></p><p><i>PS</i><span><b>PipSpark</b><small>In Deduction Mode</small></span><button class="next-version">Spectate</button></p><p><i>RB</i><span><b>RoboBoy</b><small>Offline</small></span></p></aside>
+        </div>
+        <label class="name-field" id="name-field" for="player-name">YOUR DISPLAY NAME<input id="player-name" type="text" maxlength="20" autocomplete="nickname" placeholder="Player"></label>
+        <div class="menu-actions">
+          <button id="deductionBtn" class="activity-row deduction-menu-button"><i>🔎</i><b>DEDUCTION MODE<small>Find the Glitch-Bot impostor</small></b><em>4–10 Players</em><span>QUICK JOIN</span></button>
+          <button id="newBtn" class="activity-row"><i>◉</i><b>IT PARK FREE ROAM<small>Cruise custom karts &amp; meet friends</small></b><em>CHILL SANDBOX</em><span>ENTER CITY</span></button>
+          <button class="activity-row next-version"><i>🛵</i><b>BOBA TEA DASH<small>Deliver snack orders across Jose Maria St.</small></b><em>TIME ATTACK</em><span>SPRINT</span></button>
+          <button id="continueBtn" disabled>CONTINUE <span>↗</span></button><button id="resumeBtn" hidden>RESUME <span>→</span></button><button id="customizeBtn" class="next-version" type="button">CUSTOMIZE CHARACTER <span>✦</span></button><button id="mapBtn" class="next-version" type="button">IT PARK MAP <span>⌖</span></button><button id="settingsBtn" class="next-version" type="button">SETTINGS <span>⚙</span></button><button id="saveBtn" hidden>SAVE GAME <span>↓</span></button><button id="loadBtn" hidden>LOAD GAME <span>↗</span></button><button id="exit-deduction" class="exit-deduction" type="button" hidden>EXIT MATCH <span>×</span></button>
+        </div>
+        <section id="pause-menu" class="pause-menu" hidden aria-label="Game paused"><small>GAME PAUSED</small><h2>DISTRICT ZERO</h2><details class="crosshair-options"><summary>CROSSHAIR OPTIONS</summary><label>STYLE<select id="crosshair-shape"><option value="plus">PLUS</option><option value="dot">DOT</option><option value="ring">RING</option></select></label><label>COLOR<input id="crosshair-color" type="color" value="#eafcff"></label><label>SIZE<input id="crosshair-size" type="range" min="12" max="42" step="1"></label><label>OPACITY<input id="crosshair-opacity" type="range" min="0.25" max="1" step="0.05"></label></details><button id="pause-resume" type="button" class="primary">▶ RESUME</button><button id="pause-home" type="button">⌂ HOME</button><button id="pause-exit" type="button">✕ EXIT GAME</button></section>
+        <div id="lobby-panel" class="lobby-panel" hidden>
+          <div id="lobby-browser">
+            <div class="lobby-head"><button id="lobby-main-menu" type="button" class="lobby-back-btn">‹ MAIN MENU</button><div class="eyebrow">DEDUCTION LOBBIES</div><button id="lobby-refresh" type="button" class="lobby-ghost-btn">REFRESH</button></div>
+            <p class="lobby-copy">Join a crew, or start your own. A round needs 5 to 10 players; add NPCs to fill empty seats.</p>
+            <div id="lobby-loading" class="lobby-loading" hidden><i></i><span>SYNCING OPEN ROOMS…</span></div>
+            <form id="lobby-create" class="lobby-create">
+              <input id="lobby-name" type="text" maxlength="28" placeholder="Room name" aria-label="Room name">
+              <button type="submit" class="primary">CREATE ROOM <span>+</span></button>
+            </form>
+            <ul id="lobby-rooms" class="lobby-rooms"></ul>
+            <p id="lobby-empty" class="lobby-empty">No open rooms yet. Create one above.</p>
+            <section id="lobby-room-preview" class="lobby-room-preview" hidden><button id="lobby-preview-back" type="button" class="lobby-back-btn">‹ ALL ROOMS</button><div><small>ROOM DETAILS</small><h2 id="lobby-preview-name">—</h2><p id="lobby-preview-meta"></p></div><button id="lobby-preview-join" type="button" class="primary">JOIN ROOM ›</button></section>
+          </div>
+          <div id="lobby-room" hidden>
+            <header class="ready-room-head"><button id="lobby-leave" type="button" class="lobby-back-btn">‹ BACK</button><div><span class="eyebrow">DEDUCTION READY ROOM</span><h2 id="lobby-room-name">—</h2></div><ol id="lobby-steps" class="lobby-steps" hidden><li data-step="character" class="is-active"><b>1</b>CHARACTER</li><li data-step="weapon"><b>2</b>WEAPON</li></ol><div class="ready-room-count"><b id="lobby-player-count">0 / 10</b><small>CREW</small></div></header>
+            <div class="ready-room-layout">
+              <section class="pirate-select" id="step-character-select" aria-labelledby="pirate-select-title"><div class="eyebrow">AVAILABLE CADETS <span>5 HEROES</span></div><h3 id="pirate-select-title">CHOOSE YOUR CADET</h3><div id="lobby-character-grid" class="lobby-character-grid">
+                <button type="button" data-character="Henry"><i>H</i><span>HENRY<small>CAPTAIN</small></span></button>
+                <button type="button" data-character="Anne"><i>A</i><span>ANNE<small>NAVIGATOR</small></span></button>
+                <button type="button" data-character="Mako"><i>M</i><span>MAKO<small>DECKHAND</small></span></button>
+                <button type="button" data-character="Captain_Barbarossa"><i>B</i><span>BARBAROSSA<small>COMMANDER</small></span></button>
+                <button type="button" data-character="Sharky"><i>S</i><span>SHARKY<small>RAIDER</small></span></button>
+              </div></section>
+              <section class="selected-pirate" id="step-character-preview" aria-live="polite"><div class="cadet-class">☆ CAPTAIN CLASS</div><strong class="cadet-preview-name" id="selected-pirate-name">HENRY</strong><div id="selected-pirate-art" class="selected-pirate-art" data-character="Henry"><canvas id="lobby-character-preview" aria-label="Animated 3D cadet preview"></canvas><span class="pirate-loading">LOADING CADET…</span></div><div class="selected-pirate-copy"><small>⚡ CADET PASSIVE ABILITY</small><p>+15% Sprint Speed &amp; Boosted High Jumps!</p></div></section>
+<section class="pirate-select" id="step-weapon-select" aria-labelledby="gun-select-title" hidden><div class="eyebrow">CHOOSE YOUR WEAPON</div><h3 id="gun-select-title">SELECT PRIMARY</h3><div id="lobby-gun-grid" class="lobby-character-grid lobby-gun-grid">
+                <button type="button" data-gun="smg"><i></i><span>MACHINE PISTOL<small>SMG</small></span></button>
+                <button type="button" data-gun="rifle"><i></i><span>PULSE RIFLE<small>ASSAULT</small></span></button>
+                <button type="button" data-gun="shotgun"><i></i><span>SCATTER RAY<small>CLOSE</small></span></button>
+                <button type="button" data-gun="sniper"><i></i><span>RAILGUN<small>SNIPER</small></span></button>
+                <button type="button" data-gun="magnum"><i></i><span>MAGNUM<small>HEAVY</small></span></button>
+                <button type="button" data-gun="arc"><i></i><span>ARC EMITTER<small>ENERGY</small></span></button>
+              </div></section>
+              <section class="selected-pirate" id="step-weapon-preview" aria-live="polite" hidden><div id="selected-gun-art" class="selected-pirate-art selected-gun-art"><canvas id="lobby-gun-preview" aria-label="Animated 3D weapon preview"></canvas><span class="pirate-loading">LOADING WEAPON…</span></div><div class="selected-pirate-copy"><small>YOUR PRIMARY</small><strong id="selected-gun-name">MACHINE PISTOL</strong><p id="selected-gun-stats">Pick the weapon you spawn with. You always carry a sidearm and a blade.</p></div></section>
+              <aside class="crew-ready"><div class="character-side-panel"><div class="eyebrow">CREW IN LOBBY</div><h3>READY CADETS</h3></div><div class="weapon-side-panel"><div class="eyebrow">MATCH RULES <b>5 MIN</b></div><h3 id="lobby-map-name">IT PARK</h3><p id="lobby-map-description">Arena: Cebu IT Park</p><p>Spawn Respawn: 3 Seconds</p></div><ul id="lobby-members" class="lobby-members"></ul><div id="lobby-map-wrap" class="lobby-map-choice" hidden><span class="eyebrow">SELECT MAP · HOST ONLY</span><div id="lobby-map-choice"><button type="button" data-map="it-park"><b>IT PARK</b><small>Open-air city combat</small></button><button type="button" data-map="office"><b>THE OFFICE</b><small>Wing A · Elevator · Wing B</small></button></div></div><div id="lobby-duration-wrap" class="lobby-duration" hidden>
+                <span class="eyebrow">MATCH LENGTH</span>
+                <div id="lobby-duration" class="duration-choice">
+                  <button type="button" data-minutes="5" class="is-on">5 MIN</button>
+                  <button type="button" data-minutes="10">10 MIN</button>
+                </div>
+              </div><label class="lobby-npc" for="lobby-npc">ADD BOTS <output id="lobby-npc-value">0 / 4</output><input id="lobby-npc" type="range" min="0" max="4" step="1" value="0"></label><p id="lobby-status" class="lobby-status"></p></aside>
+            </div>
+            <div class="lobby-actions"><button id="lobby-step-back" type="button" hidden>‹ CHANGE CHARACTER</button><button id="lobby-lock-character" class="primary" type="button" hidden>LOCK IN · CHOOSE WEAPON ›</button><button id="lobby-ready" type="button">READY</button><button id="lobby-start" class="primary" type="button" disabled>PLAY <span>▶</span></button></div>
+          </div>
+        </div>
+        <div id="map-backdrop" class="map-backdrop" hidden></div><div id="district-map-panel" class="district-map-panel" hidden><div class="eyebrow">CEBU IT PARK · NORTH UP</div><p>Office towers, dining streets, Garden Bloc, and your current route.</p><canvas id="district-map" width="700" height="880" aria-label="Cebu IT Park streets and landmarks"></canvas><p class="map-legend">Gold: courier · Mint: fares · Purple: circuit · Blue: garage · Green diamond: your task</p><p>Geography from <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>. Stylized exteriors and landscaping. <a href="/data/cebu-it-park.json" download>Map data (ODbL)</a></p></div><div id="settings-panel" class="settings-panel" hidden><div class="eyebrow">GAME SETTINGS</div><label>Mouse sensitivity <output id="sensitivity-value"></output><input id="sensitivity-setting" type="range" min="0.4" max="2" step="0.1"></label><label>Audio volume <output id="volume-value"></output><input id="volume-setting" type="range" min="0" max="1" step="0.05"></label><label>HUD size <output id="hud-size-value"></output><input id="hud-size-setting" type="range" min="0.8" max="1.4" step="0.05"></label><div class="eyebrow">KEY BINDINGS</div><p>Choose an action, then press a key. Esc cancels.</p><div id="key-bindings" class="key-bindings"></div></div>
         <div id="customize-panel" class="customize-panel" hidden><div class="eyebrow">YOUR LOOK</div><p>Choose your Pirate Kit character. Your choice is shown to other players online.</p><label class="character-choice" for="character-choice">CHARACTER<select id="character-choice"><option value="Henry">Henry · Captain</option><option value="Anne">Anne · Navigator</option><option value="Mako">Mako · Deckhand</option><option value="Captain_Barbarossa">Captain Barbarossa</option><option value="Sharky">Sharky · Raider</option></select></label><div class="customize-layout"><canvas id="style-preview" width="120" height="160" aria-label="Character style preview"></canvas><div id="appearance-options" class="appearance-options"></div></div></div>
-        <div class="menu-footer"><div><b>ON FOOT</b>Move · Jump · Sprint · Interact · 1 fists · 2 pistol · Click attack · Reload</div><div><b>DRIVING</b>Move keys drive · Jump key handbrake · Interact to exit</div><div><b>FLIGHT CHEATS</b>ROCKETMAN: Space rise, Ctrl descend, E remove. JUMPJET: W rise in hover, Num 8 or B flight mode, Num 2 or B hover. OHDUDE: W rise, S descend, arrows move.</div><div><b>ACTIVITIES</b>Find colored street markers · Follow the road route · Earn cash · Upgrade at the garage</div><div><b>ONLINE</b>See other players · Enter opens chat · Pick a mood emoji · V push to talk · T open mic · Customize clothes while paused</div><div><b>CAMERA & SAVE</b>Move mouse to orbit · Right mouse aim · Esc pause · F5 save · F9 load · Change keys in Settings</div></div>
+        <div class="menu-footer"><div><b>ON FOOT</b>Move · Jump · Sprint · Interact · 1 fists · 2 pistol · Click attack · Reload</div><div><b>DEDUCTION</b>Find the red lobby circle · E enters/interacts · Impostor: Q knife, click kill, G vent, X sabotage</div><div><b>DRIVING</b>Move keys drive · Jump key handbrake · Interact to exit</div><div><b>FLIGHT CHEATS</b>ROCKETMAN: Space rise, Ctrl descend, E remove. JUMPJET: W rise in hover, Num 8 or B flight mode, Num 2 or B hover. OHDUDE: W rise, S descend, arrows move.</div><div><b>ACTIVITIES</b>Find colored street markers · Follow the road route · Earn cash · Upgrade at the garage</div><div><b>ONLINE</b>See other players · Enter opens chat · Pick a mood emoji · V push to talk · T open mic · Customize clothes while paused</div><div><b>CAMERA & SAVE</b>Move mouse to orbit · Right mouse aim · Esc pause · F5 save · F9 load · Change keys in Settings</div></div>
         <div class="build-note">ORIGINAL BROWSER SANDBOX · WORK IN PROGRESS</div>
       </div>
     </div>
