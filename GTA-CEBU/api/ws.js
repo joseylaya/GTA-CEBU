@@ -162,7 +162,7 @@ async function dropFromRoom(peerId,roomId){
   if(emptied){await deleteRoom(room.id);await publishRoomList();return;}
   await publishRoom(room);await publishRoomList();
 }
-const PIRATE_CHARACTERS=new Set(['Henry','Anne','Mako','Captain_Barbarossa','Sharky']);
+const PIRATE_CHARACTERS=new Set(['Atlas','Nova']);
 // AWS ElastiCache/MemoryDB should normally be supplied as a private redis:// or
 // rediss:// URL to the long-running Node service. REDIS_URL remains supported
 // for the Vercel adapter during migration.
@@ -196,7 +196,7 @@ const wss=new WebSocketServer({server,maxPayload:16384});
 
 function publicPeer(peer){
   const activeMood=peer.moodUntil>Date.now();
-  return {id:peer.id,name:peer.name,x:peer.x,z:peer.z,y:peer.y,h:peer.h,inCar:peer.inCar,flight:peer.flight,ghost:peer.ghost===true,character:peer.character,appearance:peer.appearance,animation:peer.animation,weapon:peer.weapon,pitch:peer.pitch||0,aiming:peer.aiming,attacking:peer.attacking,attackArm:peer.attackArm,mood:activeMood?peer.mood:null,moodUntil:activeMood?peer.moodUntil:0};
+  return {id:peer.id,name:peer.name,x:peer.x,z:peer.z,y:peer.y,h:peer.h,inCar:peer.inCar,flight:peer.flight,ghost:peer.ghost===true,character:PIRATE_CHARACTERS.has(peer.character)?peer.character:'Atlas',appearance:peer.appearance,animation:peer.animation,weapon:peer.weapon,pitch:peer.pitch||0,aiming:peer.aiming,reloading:peer.reloading===true,attacking:peer.attacking,attackArm:peer.attackArm,mood:activeMood?peer.mood:null,moodUntil:activeMood?peer.moodUntil:0};
 }
 function send(socket,type,data){if(socket.readyState===WebSocket.OPEN)socket.send(JSON.stringify({type,data}));}
 async function publish(type,data){await redis.publish(CHANNEL,JSON.stringify({type,data}));}
@@ -260,7 +260,7 @@ wss.on('connection',(socket,request)=>{
         if(!secret)secret=randomBytes(24).toString('hex');
         // Claiming ownership here is what makes the handover safe: the socket
         // being replaced will find the owner changed and leave the player alone.
-        peer={id:resumeId||randomUUID(),secret,connectionId:randomBytes(12).toString('hex'),name:validName(event.name),appearance:normalizeAppearance(event.appearance),character:PIRATE_CHARACTERS.has(event.character)?event.character:'Henry',animation:'Idle',weapon:'pistol',aiming:false,attacking:false,attackArm:0,x:SPAWN.x,z:SPAWN.z,y:0,h:0,inCar:false,flight:null,mood:null,moodUntil:0,lastState:0,lastChat:0,lastMood:0,voiceWindow:0,voiceCount:0,effectWindow:0,effectCount:0,roomId:null};
+        peer={id:resumeId||randomUUID(),secret,connectionId:randomBytes(12).toString('hex'),name:validName(event.name),appearance:normalizeAppearance(event.appearance),character:PIRATE_CHARACTERS.has(event.character)?event.character:'Atlas',animation:'Idle',weapon:'pistol',aiming:false,reloading:false,attacking:false,attackArm:0,x:SPAWN.x,z:SPAWN.z,y:0,h:0,inCar:false,flight:null,mood:null,moodUntil:0,lastState:0,lastChat:0,lastMood:0,voiceWindow:0,voiceCount:0,effectWindow:0,effectCount:0,roomId:null};
         await persist(peer,{force:true});
         voiceSockets.set(peer.id,socket);
         // A resumed player is very likely still sitting in a lobby.
@@ -275,7 +275,7 @@ wss.on('connection',(socket,request)=>{
       const now=Date.now();
       if(event.type==='state'){
         if(now-peer.lastState<55||!validPosition(event))return;
-        peer.x=event.x;peer.z=event.z;peer.y=event.y;peer.h=event.h;peer.inCar=event.inCar===true;peer.ghost=event.ghost===true;peer.flight=['jetpack','jet','helicopter'].includes(event.flight)?event.flight:null;if(event.appearance)peer.appearance=normalizeAppearance(event.appearance);peer.animation=['Idle','Walk','Run','Jump','Punch'].includes(event.animation)?event.animation:'Idle';peer.weapon=WEAPONS.has(event.weapon)?event.weapon:'hands';peer.pitch=cleanPitch(event.pitch);peer.aiming=event.aiming===true;peer.attacking=event.attacking===true;peer.attackArm=event.attackArm===1?1:0;peer.lastState=now;
+        peer.x=event.x;peer.z=event.z;peer.y=event.y;peer.h=event.h;peer.inCar=event.inCar===true;peer.ghost=event.ghost===true;peer.flight=['jetpack','jet','helicopter'].includes(event.flight)?event.flight:null;if(event.appearance)peer.appearance=normalizeAppearance(event.appearance);peer.animation=['Idle','Walk','Run','Jump','Punch'].includes(event.animation)?event.animation:'Idle';peer.weapon=WEAPONS.has(event.weapon)?event.weapon:'hands';peer.pitch=cleanPitch(event.pitch);peer.aiming=event.aiming===true;peer.reloading=event.reloading===true;peer.attacking=event.attacking===true;peer.attackArm=event.attackArm===1?1:0;peer.lastState=now;
         await persist(peer);await publish('state',publicPeer(peer));return;
       }
       if(event.type==='heartbeat'){
@@ -355,7 +355,7 @@ wss.on('connection',(socket,request)=>{
             await publishRoom(room);
             if(joinedLive){
               send(socket,'room-start',{roomId:room.id,mode:'ffa',mapId:room.round.mapId||'it-park',hostId:room.hostId,startsAt:room.round.startsAt,
-                roster:room.round.roster.map(entry=>({id:entry.id,name:entry.name})),resumed:true});
+                roster:room.round.roster.map(entry=>({id:entry.id,name:entry.name,character:entry.character})),resumed:true});
               send(socket,'ffa',publicFfa(room.round,peer.id));
               await emitFfa(room,joinedLive.event||null);
               await publishRoomList();
@@ -430,10 +430,10 @@ wss.on('connection',(socket,request)=>{
           });
           if(!room)return;
           if(result?.abort){if(result.message)send(socket,'error',{message:result.message});return;}
-          if(room.mode==='ffa'){await publish('room-start',{roomId:room.id,mode:'ffa',mapId:room.round.mapId,hostId:room.hostId,startsAt:room.round.startsAt,roster:room.members.map(entry=>({id:entry.id,name:entry.name}))});await emitFfa(room);await publishRoomList();return;}
+          if(room.mode==='ffa'){await publish('room-start',{roomId:room.id,mode:'ffa',mapId:room.round.mapId,hostId:room.hostId,startsAt:room.round.startsAt,roster:room.members.map(entry=>({id:entry.id,name:entry.name,character:entry.character}))});await emitFfa(room);await publishRoomList();return;}
           // Roles go out on the shared channel; each client keeps only its own.
           await publish('room-start',{roomId:room.id,hostId:room.hostId,...setup,
-            roster:room.members.map(entry=>({id:entry.id,name:entry.name}))});
+            roster:room.members.map(entry=>({id:entry.id,name:entry.name,character:entry.character}))});
           // Roles went out above; now everyone needs the opening round snapshot.
           await emitRound(room);
           await publishRoomList();return;

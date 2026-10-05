@@ -164,7 +164,7 @@ export function createMultiplayer({scene,avatar,getAccountToken,applyAppearance,
       attachWeapon?.(body);
       attachKnife?.(body);
       body.add(jetpack);root.add(body,vehicle,jet,helicopter);const nameTag=textSprite(data.name||'Player',{background:'#284d58',worldWidth:3.2});nameTag.position.y=4.35;nameTag.visible=playerNamesVisible;root.add(nameTag);
-      peer={root,body,vehicle,jet,helicopter,jetpack,nameTag,name:data.name||'Player',ghost:false,matchAlive:true,voiceSprite:null,speaking:false,bubble:null,bubbleUntil:0,moodSprite:null,moodKind:null,moodUntil:0,appearanceKey:'',target:new THREE.Vector3(),previousTarget:new THREE.Vector3(),velocity:new THREE.Vector3(),lastStateAt:performance.now(),heading:data.h||0,flight:data.flight||null,animation:['Idle','Walk','Run','Jump','Punch'].includes(data.animation)?data.animation:'Idle',weapon:PEER_WEAPONS.has(data.weapon)?data.weapon:'hands',pitch:0,shownPitch:0,aiming:data.aiming===true,attacking:false,attackArm:data.attackArm===1?1:0,attackUntil:0};
+      peer={root,body,vehicle,jet,helicopter,jetpack,nameTag,name:data.name||'Player',ghost:false,matchAlive:true,voiceSprite:null,speaking:false,bubble:null,bubbleUntil:0,moodSprite:null,moodKind:null,moodUntil:0,appearanceKey:'',target:new THREE.Vector3(),previousTarget:new THREE.Vector3(),velocity:new THREE.Vector3(),lastStateAt:performance.now(),heading:data.h||0,flight:data.flight||null,animation:['Idle','Walk','Run','Jump','Punch'].includes(data.animation)?data.animation:'Idle',weapon:PEER_WEAPONS.has(data.weapon)?data.weapon:'hands',pitch:0,shownPitch:0,aiming:data.aiming===true,reloading:data.reloading===true,attacking:false,attackArm:data.attackArm===1?1:0,attackUntil:0,switchingUntil:0};
       remote.set(data.id,peer);scene.add(root);root.position.set(data.x||0,data.y||0,data.z||0);root.visible=!visiblePeerIds||visiblePeerIds.has(data.id);
       peer.target.copy(root.position);peer.previousTarget.copy(root.position);
     }
@@ -173,7 +173,7 @@ export function createMultiplayer({scene,avatar,getAccountToken,applyAppearance,
     // reading it as "back to the default" turned every player into a default
     // Henry twelve times a second.
     if(data.character&&data.character!==peer.character){peer.character=data.character;attachCharacter?.(peer.body,data.character);}
-    else if(!peer.character){peer.character='Henry';attachCharacter?.(peer.body,'Henry');}
+    else if(!peer.character){peer.character='Atlas';attachCharacter?.(peer.body,'Atlas');}
     if(data.appearance){
       const look=normalizeAppearance(data.appearance),appearanceKey=JSON.stringify(look);
       if(peer.appearanceKey!==appearanceKey){applyAppearance(peer.body,look);peer.appearanceKey=appearanceKey;}
@@ -202,9 +202,12 @@ export function createMultiplayer({scene,avatar,getAccountToken,applyAppearance,
     // Derived from the shared weapon table, never hand-listed: the literal this
     // replaced was missing magnum and arc, so a peer holding either was
     // sanitised to 'hands' and rendered empty-handed.
-    peer.weapon=PEER_WEAPONS.has(data.weapon)?data.weapon:'hands';
+    const nextWeapon=PEER_WEAPONS.has(data.weapon)?data.weapon:'hands';
+    if(nextWeapon!==peer.weapon)peer.switchingUntil=now+420;
+    peer.weapon=nextWeapon;
     peer.pitch=Number.isFinite(Number(data.pitch))?Math.max(-1.4,Math.min(1.4,Number(data.pitch))):0;
     peer.aiming=data.aiming===true;
+    peer.reloading=data.reloading===true;
     peer.attackArm=data.attackArm===1?1:0;
     if(data.attacking===true)peer.attackUntil=now+(peer.weapon==='fists'?330:peer.weapon==='knife'?420:180);
     else peer.attackUntil=0;
@@ -302,7 +305,7 @@ export function createMultiplayer({scene,avatar,getAccountToken,applyAppearance,
     socket.addEventListener('open',()=>{
       if(attempt!==sequence){socket.close();return;}
       socket.send(JSON.stringify({
-        type:'join',name,appearance:getAppearance(),character:getCharacter?.()||'Henry',
+        type:'join',name,appearance:getAppearance(),character:getCharacter?.()||'Atlas',
         // Says who you are so a finished match can be credited. Optional:
         // without it you simply play as a guest and earn nothing.
         ...(getAccountToken?.()?{account:getAccountToken()}:{}),
@@ -376,7 +379,7 @@ export function createMultiplayer({scene,avatar,getAccountToken,applyAppearance,
   }
   async function startLegacy(name,attempt){
     try{
-      const joined=await post('/api/join',{name,appearance:getAppearance(),character:getCharacter?.()||'Henry',...(getAccountToken?.()?{account:getAccountToken()}:{})});
+      const joined=await post('/api/join',{name,appearance:getAppearance(),character:getCharacter?.()||'Atlas',...(getAccountToken?.()?{account:getAccountToken()}:{})});
       if(attempt!==sequence)return;
       session=joined;
       joined.players.forEach(addPeer);
@@ -583,8 +586,8 @@ export function createMultiplayer({scene,avatar,getAccountToken,applyAppearance,
         animation:lingering?'Death':peer.body.visible?animation:'Idle',weapon:peer.weapon,
         // Eased like the heading, so aim reads as a head turn rather than a snap.
         pitch:(peer.shownPitch+=((fresh?peer.pitch:0)-peer.shownPitch)*(1-Math.exp(-dt*14))),
-        aiming:fresh&&peer.aiming,attacking:performance.now()<peer.attackUntil,
-        attackArm:peer.attackArm
+        aiming:fresh&&peer.aiming,reloading:fresh&&peer.reloading,attacking:performance.now()<peer.attackUntil,
+        attackArm:peer.attackArm,switchingUntil:peer.switchingUntil
       },dt);
       if(peer.flight==='helicopter')animateAircraft(peer.helicopter,'helicopter',dt);
       if(peer.bubble&&performance.now()>peer.bubbleUntil){removeSprite(peer.root,peer.bubble);peer.bubble=null;}
@@ -597,7 +600,7 @@ export function createMultiplayer({scene,avatar,getAccountToken,applyAppearance,
         stateClock=.08;
         const appearance=getAppearance();
         const animation=getPlayerAnimation?.()||{};
-        const character=getCharacter?.()||'Henry';
+        const character=getCharacter?.()||'Atlas';
         const identity=JSON.stringify([character,appearance]);
         const fingerprint=JSON.stringify([Math.round(position.x*50),Math.round(position.y*50),Math.round(position.z*50),Math.round(position.h*50),position.inCar,position.flight,position.ghost,identity,animation]);
         const now=performance.now();
@@ -641,7 +644,7 @@ export function createMultiplayer({scene,avatar,getAccountToken,applyAppearance,
       stateClock=.1;stateBusy=true;
       // Same trimming as the socket path: identity rides the first packet and
       // any packet that changes it, not every one.
-      const appearance=getAppearance(),character=getCharacter?.()||'Henry';
+      const appearance=getAppearance(),character=getCharacter?.()||'Atlas';
       const identity=JSON.stringify([character,appearance]);
       const trim=value=>Math.round(value*100)/100;
       const packet={token:session.token,...position,...getPlayerAnimation?.(),
@@ -651,7 +654,7 @@ export function createMultiplayer({scene,avatar,getAccountToken,applyAppearance,
       post('/api/state',packet).catch(()=>{}).finally(()=>{stateBusy=false;});
     }
   }
-  function refreshCharacters(){for(const peer of remote.values())if(attachCharacter)attachCharacter(peer.body,peer.character||'Henry');}
+  function refreshCharacters(){for(const peer of remote.values())if(attachCharacter)attachCharacter(peer.body,peer.character||'Atlas');}
   return {
     start,disconnect,update,handlesKey,isTyping:()=>!form.hidden,closeChat,refreshCharacters,
     // Voice chat integration. These expose the multiplayer layer's own player

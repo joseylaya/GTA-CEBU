@@ -9,7 +9,7 @@ import {activityById} from '../src/activities.js';
 const cleanPitch=value=>Number.isFinite(Number(value))?Math.max(-1.4,Math.min(1.4,Number(value))):0;
 
 
-const PIRATES=new Set(['Henry','Anne','Mako','Captain_Barbarossa','Sharky']);
+const PIRATES=new Set(['Atlas','Nova']);
 // Derived from the shared table so a new firearm cannot be silently downgraded
 // to 'hands' on the wire, which is what hid magnum and arc from other players.
 const WEAPONS=new Set(['fists','hands','knife',...Object.keys(FFA_WEAPONS)]);
@@ -104,8 +104,8 @@ export class DistrictCoordinator {
   // a third of the packet and never change between frames, so they travel on
   // join, on the heartbeat, and whenever they really do change -- not twelve
   // times a second per player.
-  movingPeer(peer){return {id:peer.id,name:peer.name,x:peer.x||0,z:peer.z||0,y:peer.y||0,h:peer.h||0,inCar:peer.inCar===true,flight:peer.flight||null,ghost:peer.ghost===true,animation:peer.animation||'Idle',weapon:peer.weapon||'hands',pitch:peer.pitch||0,aiming:peer.aiming===true,attacking:peer.attacking===true,attackArm:peer.attackArm===1?1:0};}
-  publicPeer(peer){return {id:peer.id,name:peer.name,x:peer.x||0,z:peer.z||0,y:peer.y||0,h:peer.h||0,inCar:peer.inCar===true,flight:peer.flight||null,ghost:peer.ghost===true,character:peer.character||'Henry',appearance:peer.appearance||{},animation:peer.animation||'Idle',weapon:peer.weapon||'hands',pitch:peer.pitch||0,aiming:peer.aiming===true,attacking:peer.attacking===true,attackArm:peer.attackArm===1?1:0,mood:peer.moodUntil>Date.now()?peer.mood:null,moodUntil:peer.moodUntil||0};}
+  movingPeer(peer){return {id:peer.id,name:peer.name,x:peer.x||0,z:peer.z||0,y:peer.y||0,h:peer.h||0,inCar:peer.inCar===true,flight:peer.flight||null,ghost:peer.ghost===true,animation:peer.animation||'Idle',weapon:peer.weapon||'hands',pitch:peer.pitch||0,aiming:peer.aiming===true,reloading:peer.reloading===true,attacking:peer.attacking===true,attackArm:peer.attackArm===1?1:0};}
+  publicPeer(peer){return {id:peer.id,name:peer.name,x:peer.x||0,z:peer.z||0,y:peer.y||0,h:peer.h||0,inCar:peer.inCar===true,flight:peer.flight||null,ghost:peer.ghost===true,character:PIRATES.has(peer.character)?peer.character:'Atlas',appearance:peer.appearance||{},animation:peer.animation||'Idle',weapon:peer.weapon||'hands',pitch:peer.pitch||0,aiming:peer.aiming===true,reloading:peer.reloading===true,attacking:peer.attacking===true,attackArm:peer.attackArm===1?1:0,mood:peer.moodUntil>Date.now()?peer.mood:null,moodUntil:peer.moodUntil||0};}
   roomOf(id){for(const room of this.rooms.values())if(room.members.some(member=>member.id===id))return room;return null;}
   async persistRooms(){this._dirty=false;await this.ctx.storage.put('rooms',[...this.rooms.values()]);}
   // Durable Object storage is the slowest thing in the message path, and a
@@ -188,7 +188,7 @@ export class DistrictCoordinator {
       // are -- the scores come from the round, which the server owns.
       peer=this.savePeer(ws,{id,token:secret,gen:Date.now(),teleportBudget:2,
         account:typeof event.account==='string'&&event.account.length<=200?event.account:null,
-        name:cleanName(event.name),character:PIRATES.has(event.character)?event.character:'Henry',appearance:cleanAppearance(event.appearance),x:0,z:0,y:0,h:0,animation:'Idle',weapon:'hands',lastChat:0,mood:null,moodUntil:0});
+        name:cleanName(event.name),character:PIRATES.has(event.character)?event.character:'Atlas',appearance:cleanAppearance(event.appearance),x:0,z:0,y:0,h:0,animation:'Idle',weapon:'hands',lastChat:0,mood:null,moodUntil:0});
       await this.ctx.storage.put(`identity:${id}`,secret);
       this.send(ws,'welcome',{id,token:secret,players:this.peers(id).map(item=>this.publicPeer(item)),resumed:resuming});
       this.broadcastNear(id,'joined',this.publicPeer(peer),id);
@@ -208,7 +208,7 @@ export class DistrictCoordinator {
         }
         this.send(ws,'room',publicRoom(room));
         if(room.mode==='ffa'&&room.round&&room.round.phase!=='ended'){
-          this.send(ws,'room-start',{mode:'ffa',mapId:room.round.mapId||'it-park',hostId:room.hostId,startsAt:room.round.startsAt,roster:room.round.roster.map(entry=>({id:entry.id,name:entry.name})),resumed:true});
+          this.send(ws,'room-start',{mode:'ffa',mapId:room.round.mapId||'it-park',hostId:room.hostId,startsAt:room.round.startsAt,roster:room.round.roster.map(entry=>({id:entry.id,name:entry.name,character:entry.character})),resumed:true});
           this.send(ws,'ffa',publicFfa(room.round,id));
         }else if(room.round&&room.round.phase!=='ended'&&room.setup){
           // Rebuild their round from the original setup. The layout is derived
@@ -217,7 +217,7 @@ export class DistrictCoordinator {
           const seat=room.round.roster.find(entry=>entry.id===id);
           this.send(ws,'room-start',{...room.setup,hostId:room.hostId,
             role:seat?.role||'crewmate',roles:undefined,
-            roster:room.members.map(entry=>({id:entry.id,name:entry.name})),
+            roster:room.members.map(entry=>({id:entry.id,name:entry.name,character:entry.character})),
             resumed:true});
         }
         if(room.round&&room.mode!=='ffa')this.send(ws,'round',publicRound(room.round,id));
@@ -238,7 +238,7 @@ export class DistrictCoordinator {
         if((peer.teleportBudget||0)<=0)return;
         peer=this.savePeer(ws,{teleportBudget:Math.max(0,(peer.teleportBudget||0)-1)});
       }
-      peer=this.savePeer(ws,{x:event.x,z:event.z,y:event.y,h:event.h,inCar:event.inCar===true,ghost:event.ghost===true,flight:['jetpack','jet','helicopter'].includes(event.flight)?event.flight:null,character:PIRATES.has(event.character)?event.character:peer.character,appearance:event.appearance?cleanAppearance(event.appearance):peer.appearance,animation:['Idle','Walk','Run','Jump','Punch'].includes(event.animation)?event.animation:'Idle',weapon:WEAPONS.has(event.weapon)?event.weapon:'hands',pitch:cleanPitch(event.pitch),aiming:event.aiming===true,attacking:event.attacking===true,attackArm:event.attackArm===1?1:0});
+      peer=this.savePeer(ws,{x:event.x,z:event.z,y:event.y,h:event.h,inCar:event.inCar===true,ghost:event.ghost===true,flight:['jetpack','jet','helicopter'].includes(event.flight)?event.flight:null,character:PIRATES.has(event.character)?event.character:peer.character,appearance:event.appearance?cleanAppearance(event.appearance):peer.appearance,animation:['Idle','Walk','Run','Jump','Punch'].includes(event.animation)?event.animation:'Idle',weapon:WEAPONS.has(event.weapon)?event.weapon:'hands',pitch:cleanPitch(event.pitch),aiming:event.aiming===true,reloading:event.reloading===true,attacking:event.attacking===true,attackArm:event.attackArm===1?1:0});
       this.broadcastNear(peer.id,'state',this.movingPeer(peer),peer.id);return;
     }
     if(event.type==='heartbeat')return;
@@ -281,7 +281,7 @@ export class DistrictCoordinator {
       if(member.ready&&room.mode==='ffa'&&room.round&&room.round.phase!=='ended'&&!alreadyPlaying){
         const outcome=ffaJoinRound(room.round,member);
         this.send(ws,'room-start',{mode:'ffa',mapId:room.round.mapId||'it-park',hostId:room.hostId,startsAt:room.round.startsAt,
-          roster:room.round.roster.map(entry=>({id:entry.id,name:entry.name})),resumed:true});
+          roster:room.round.roster.map(entry=>({id:entry.id,name:entry.name,character:entry.character})),resumed:true});
         this.send(ws,'ffa',publicFfa(room.round,peer.id));
         if(outcome.event)this.emitFfa(room,outcome.event);
       }
@@ -311,7 +311,7 @@ export class DistrictCoordinator {
     else if(action==='loadout'){if(room.mode!=='ffa')return;member.loadout=ffaLoadout(event.loadout);member.ready=member.id===room.hostId;}
     else if(action==='npc'){if(room.hostId!==peer.id)return;room.npcCount=clampNpcCount(event.npcCount,room.members.length);}
     else if(action==='start'){
-      if(room.hostId!==peer.id)return;const blocker=startBlocker(room);if(blocker){this.send(ws,'error',{message:blocker});return;}room.phase='playing';for(const item of room.members)this.grantTeleport(item.id);if(room.mode==='ffa'){room.round=createFfaRound(room);for(const item of room.members){const target=this.peerSocket(item.id);if(target)this.send(target,'room-start',{mode:'ffa',mapId:room.round.mapId,hostId:room.hostId,startsAt:room.round.startsAt,roster:room.members.map(entry=>({id:entry.id,name:entry.name}))});}this.emitFfa(room);await this.persistRooms();this.publishRoomList();await this.scheduleFfaAlarm();return;}const setup=assignRoles(room);room.round=createRound(room,setup);
+      if(room.hostId!==peer.id)return;const blocker=startBlocker(room);if(blocker){this.send(ws,'error',{message:blocker});return;}room.phase='playing';for(const item of room.members)this.grantTeleport(item.id);if(room.mode==='ffa'){room.round=createFfaRound(room);for(const item of room.members){const target=this.peerSocket(item.id);if(target)this.send(target,'room-start',{mode:'ffa',mapId:room.round.mapId,hostId:room.hostId,startsAt:room.round.startsAt,roster:room.members.map(entry=>({id:entry.id,name:entry.name,character:entry.character}))});}this.emitFfa(room);await this.persistRooms();this.publishRoomList();await this.scheduleFfaAlarm();return;}const setup=assignRoles(room);room.round=createRound(room,setup);
       room.setup=setup;
       for(const item of room.members){const target=this.peerSocket(item.id);if(target)this.send(target,'room-start',{...setup,hostId:room.hostId,role:setup.roles[item.id],roles:undefined,roster:room.members.map(entry=>({id:entry.id,name:entry.name}))});}
       this.emitRound(room);await this.persistRooms();this.publishRoomList();return;

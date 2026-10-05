@@ -149,7 +149,7 @@ const VOICE_SIGNALS=new Set(['voice:offer','voice:answer','voice:ice-candidate',
 const VOICE_SIGNAL_LIMIT=90;
 const EFFECT_KINDS=new Set(['blood']);
 const EFFECT_LIMIT=14;
-const PIRATE_CHARACTERS=new Set(['Henry','Anne','Mako','Captain_Barbarossa','Sharky']);
+const PIRATE_CHARACTERS=new Set(['Atlas','Nova']);
 let vite;
 
 function send(res,status,data){
@@ -158,8 +158,8 @@ function send(res,status,data){
 }
 // What a position update needs. Identity travels on join and whenever it
 // changes, not on every frame -- see movingPeer in the worker.
-function movingPeer(peer){return {id:peer.id,name:peer.name,x:peer.x,z:peer.z,y:peer.y,h:peer.h,inCar:peer.inCar,flight:peer.flight,ghost:peer.ghost===true,animation:peer.animation,weapon:peer.weapon,pitch:peer.pitch||0,aiming:peer.aiming,attacking:peer.attacking,attackArm:peer.attackArm};}
-function publicPeer(peer){return {id:peer.id,name:peer.name,x:peer.x,z:peer.z,y:peer.y,h:peer.h,inCar:peer.inCar,flight:peer.flight,ghost:peer.ghost===true,character:peer.character,appearance:peer.appearance,animation:peer.animation,weapon:peer.weapon,pitch:peer.pitch||0,aiming:peer.aiming,attacking:peer.attacking,attackArm:peer.attackArm,mood:peer.moodUntil>Date.now()?peer.mood:null,moodUntil:peer.moodUntil>Date.now()?peer.moodUntil:0};}
+function movingPeer(peer){return {id:peer.id,name:peer.name,x:peer.x,z:peer.z,y:peer.y,h:peer.h,inCar:peer.inCar,flight:peer.flight,ghost:peer.ghost===true,animation:peer.animation,weapon:peer.weapon,pitch:peer.pitch||0,aiming:peer.aiming,reloading:peer.reloading===true,attacking:peer.attacking,attackArm:peer.attackArm};}
+function publicPeer(peer){return {id:peer.id,name:peer.name,x:peer.x,z:peer.z,y:peer.y,h:peer.h,inCar:peer.inCar,flight:peer.flight,ghost:peer.ghost===true,character:PIRATE_CHARACTERS.has(peer.character)?peer.character:'Atlas',appearance:peer.appearance,animation:peer.animation,weapon:peer.weapon,pitch:peer.pitch||0,aiming:peer.aiming,reloading:peer.reloading===true,attacking:peer.attacking,attackArm:peer.attackArm,mood:peer.moodUntil>Date.now()?peer.mood:null,moodUntil:peer.moodUntil>Date.now()?peer.moodUntil:0};}
 function emit(peer,event,data){
   if(peer.stream&&!peer.stream.destroyed)peer.stream.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
 }
@@ -332,7 +332,7 @@ async function api(req,res,url){
     if(!signedIn){send(res,401,{error:'Sign in to enter Cebu'});return;}
     if(peers.size>=MAX_PLAYERS){send(res,503,{error:'District is full'});return;}
     const token=randomBytes(24).toString('hex');
-    const peer={id:randomUUID(),token,name:validName(signedIn.name),appearance:normalizeAppearance(body.appearance),account:body.account,character:PIRATE_CHARACTERS.has(body.character)?body.character:'Henry',animation:'Idle',weapon:'pistol',aiming:false,attacking:false,attackArm:0,mood:null,moodUntil:0,x:SPAWN.x,z:SPAWN.z,y:0,h:0,inCar:false,flight:null,teleportBudget:2,stream:null,lastSeen:Date.now(),lastChat:0,lastState:0,lastMood:0,voiceWindow:0,voiceCount:0,effectWindow:0,effectCount:0};
+    const peer={id:randomUUID(),token,name:validName(signedIn.name),appearance:normalizeAppearance(body.appearance),account:body.account,character:PIRATE_CHARACTERS.has(body.character)?body.character:'Atlas',animation:'Idle',weapon:'pistol',aiming:false,reloading:false,attacking:false,attackArm:0,mood:null,moodUntil:0,x:SPAWN.x,z:SPAWN.z,y:0,h:0,inCar:false,flight:null,teleportBudget:2,stream:null,lastSeen:Date.now(),lastChat:0,lastState:0,lastMood:0,voiceWindow:0,voiceCount:0,effectWindow:0,effectCount:0};
     peers.set(token,peer);send(res,200,{token,id:peer.id,name:peer.name,players:[...peers.values()].filter(p=>p!==peer).map(publicPeer)});
     broadcastNear(peer.id,'joined',publicPeer(peer));return;
   }
@@ -360,7 +360,7 @@ async function api(req,res,url){
       if((peer.teleportBudget||0)<=0){send(res,200,{ok:true,rejected:true});return;}
       peer.teleportBudget=Math.max(0,(peer.teleportBudget||0)-1);
     }
-    peer.x=body.x;peer.z=body.z;peer.y=body.y;peer.h=body.h;peer.inCar=body.inCar===true;peer.ghost=body.ghost===true;peer.flight=['jetpack','jet','helicopter'].includes(body.flight)?body.flight:null;if(body.appearance)peer.appearance=normalizeAppearance(body.appearance);peer.animation=['Idle','Walk','Run','Jump','Punch'].includes(body.animation)?body.animation:'Idle';peer.weapon=WEAPONS.has(body.weapon)?body.weapon:'hands';peer.pitch=cleanPitch(body.pitch);peer.aiming=body.aiming===true;peer.attacking=body.attacking===true;peer.attackArm=body.attackArm===1?1:0;peer.lastState=now;
+    peer.x=body.x;peer.z=body.z;peer.y=body.y;peer.h=body.h;peer.inCar=body.inCar===true;peer.ghost=body.ghost===true;peer.flight=['jetpack','jet','helicopter'].includes(body.flight)?body.flight:null;if(body.appearance)peer.appearance=normalizeAppearance(body.appearance);peer.animation=['Idle','Walk','Run','Jump','Punch'].includes(body.animation)?body.animation:'Idle';peer.weapon=WEAPONS.has(body.weapon)?body.weapon:'hands';peer.pitch=cleanPitch(body.pitch);peer.aiming=body.aiming===true;peer.reloading=body.reloading===true;peer.attacking=body.attacking===true;peer.attackArm=body.attackArm===1?1:0;peer.lastState=now;
     broadcastNear(peer.id,'state',movingPeer(peer));send(res,200,{ok:true});return;
   }
   if(req.method==='POST'&&url.pathname==='/api/mood'){
@@ -409,7 +409,7 @@ async function api(req,res,url){
       touchRoom(room);sendRoomState(room);
       if(joinedLive){
         emit(peer,'room-start',{mode:'ffa',mapId:room.round.mapId||'it-park',hostId:room.hostId,startsAt:room.round.startsAt,
-          roster:room.round.roster.map(entry=>({id:entry.id,name:entry.name})),resumed:true});
+          roster:room.round.roster.map(entry=>({id:entry.id,name:entry.name,character:entry.character})),resumed:true});
         emit(peer,'ffa',publicFfa(room.round,peer.id));
         if(joinedLive.event)emitFfa(room,joinedLive.event);
         broadcastRoomList();
@@ -459,7 +459,7 @@ async function api(req,res,url){
       room.phase='playing';touchRoom(room);for(const member of room.members){const target=[...peers.values()].find(candidate=>candidate.id===member.id);if(target)target.teleportBudget=Math.max(target.teleportBudget||0,2);}
       if(room.mode==='ffa'){
         room.round=createFfaRound(room);
-        for(const member of room.members){const target=[...peers.values()].find(candidate=>candidate.id===member.id);if(target)emit(target,'room-start',{mode:'ffa',mapId:room.round.mapId,hostId:room.hostId,startsAt:room.round.startsAt,roster:room.members.map(entry=>({id:entry.id,name:entry.name}))});}
+        for(const member of room.members){const target=[...peers.values()].find(candidate=>candidate.id===member.id);if(target)emit(target,'room-start',{mode:'ffa',mapId:room.round.mapId,hostId:room.hostId,startsAt:room.round.startsAt,roster:room.members.map(entry=>({id:entry.id,name:entry.name,character:entry.character}))});}
         emitFfa(room);broadcastRoomList();send(res,200,{ok:true});return;
       }
       const setup=assignRoles(room);
@@ -468,7 +468,7 @@ async function api(req,res,url){
         const target=[...peers.values()].find(candidate=>candidate.id===member.id);
         // Each player is told only their own role.
         if(target)emit(target,'room-start',{...setup,hostId:room.hostId,role:setup.roles[member.id],roles:undefined,
-          roster:room.members.map(entry=>({id:entry.id,name:entry.name}))});
+          roster:room.members.map(entry=>({id:entry.id,name:entry.name,character:entry.character}))});
       }
       // Roles went out above; now everyone needs the opening round snapshot.
       emitRound(room);

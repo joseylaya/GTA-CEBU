@@ -81,9 +81,11 @@ let activeFfaMap='it-park';
 const POLICE_GROUND_REACH=4,POLICE_AIR_RESPONSE_HEIGHT=8;
 let cheatBuffer='',cheatTime=0;
 const characterTemplates=new Map();
-const PIRATE_CHARACTERS=['Henry','Anne','Mako','Captain_Barbarossa','Sharky'];
-let characterChoice='Henry';
-try{const savedCharacter=localStorage.getItem('districtZeroCharacter');if(PIRATE_CHARACTERS.includes(savedCharacter))characterChoice=savedCharacter;}catch{}
+const UNIVERSAL_CHARACTERS={Atlas:'Superhero_Male_FullBody',Nova:'Superhero_Female_FullBody'};
+const PIRATE_CHARACTERS=['Henry','Anne','Mako','Captain_Barbarossa','Sharky',...Object.keys(UNIVERSAL_CHARACTERS)];
+const PLAYER_CHARACTERS=Object.keys(UNIVERSAL_CHARACTERS);
+let characterChoice='Atlas';
+try{const savedCharacter=localStorage.getItem('districtZeroCharacter');if(PLAYER_CHARACTERS.includes(savedCharacter))characterChoice=savedCharacter;else localStorage.setItem('districtZeroCharacter',characterChoice);}catch{}
 const previewCanvas=$('lobby-character-preview');
 const previewRenderer=new THREE.WebGLRenderer({canvas:previewCanvas,alpha:true,antialias:true,powerPreference:'low-power'});
 previewRenderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));previewRenderer.outputColorSpace=THREE.SRGBColorSpace;previewRenderer.toneMapping=THREE.ACESFilmicToneMapping;previewRenderer.toneMappingExposure=1.35;
@@ -684,8 +686,33 @@ function attachCharacterModel(mesh,name){
   visual.traverse(child=>{if(child.name?.startsWith('Weapon_'))child.visible=false;if(child.isMesh){child.castShadow=true;child.receiveShadow=true;}});
   mesh.add(visual);
   originalMeshes.forEach(part=>{if(!mesh.userData.gun?.getObjectById(part.id)&&!mesh.userData.deductionKnife?.getObjectById(part.id)&&!mesh.userData.jetpack?.getObjectById(part.id))part.visible=false;});
-  const mixer=new THREE.AnimationMixer(visual),actions=new Map(source.animations.map(clip=>[clip.name,mixer.clipAction(clip)]));
-  mesh.userData.characterVisual=visual;mesh.userData.characterMixer=mixer;mesh.userData.characterActions=actions;mesh.userData.characterName=name;
+  const mixer=new THREE.AnimationMixer(visual),actions=new Map(source.animations.map(clip=>[clip.name,mixer.clipAction(clip)])),weaponActions=new Map();
+  if(source.userData?.universal){
+    const upperBody=/^(spine_0[1-3]|neck_01|Head|clavicle_|upperarm_|lowerarm_|hand_|index_|middle_|ring_|pinky_|thumb_)/i;
+    for(const clipName of ['PistolIdle','PistolShoot','PistolReload','SwordIdle','Sword']){
+      const clip=source.animations.find(item=>item.name===clipName);if(!clip)continue;
+      const upperClip=new THREE.AnimationClip(`${clipName}_Upper`,clip.duration,clip.tracks.filter(track=>upperBody.test(track.name)).map(track=>track.clone()));
+      weaponActions.set(clipName,mixer.clipAction(upperClip));
+    }
+  }
+  mesh.userData.characterVisual=visual;mesh.userData.characterMixer=mixer;mesh.userData.characterActions=actions;mesh.userData.weaponActions=weaponActions;mesh.userData.characterName=name;mesh.userData.universalVisual=source.userData?.universal===true;
+  // The fallback avatar's shoulder used to remain the weapon parent after the
+  // imported pirate replaced it. That invisible arm has different proportions,
+  // leaving the gun floating beside the real hand. Keep the gun on the avatar
+  // root and drive its mount from the live skeleton endpoint instead.
+  if(mesh.userData.gun){
+    const hand=visual.getObjectByName('hand_r'),gun=mesh.userData.gun;
+    gun.userData.visualHand=hand||visual.getObjectByName('LowerArm.R')||null;gun.userData.visualHandIsHand=Boolean(hand);
+    // Follow the animated hand position, but do not inherit its twist. The UAL
+    // hand axis is authored for retargeting and rolls the weapon 90° upright.
+    // Avatar-space parenting keeps the barrel facing where the player aims.
+    mesh.attach(gun);gun.scale.setScalar(1);
+  }
+  if(mesh.userData.deductionKnife){
+    const knife=mesh.userData.deductionKnife;
+    knife.userData.visualHand=visual.getObjectByName('hand_r')||visual.getObjectByName('LowerArm.R')||null;
+    mesh.attach(knife);
+  }
   playCharacter(mesh,'Idle',0);
 }
 function playCharacter(mesh,name,fade=.16){
@@ -696,6 +723,103 @@ function playCharacter(mesh,name,fade=.16){
   action.reset().setEffectiveWeight(1).fadeIn(fade).play();
   action.setLoop(['Punch','HitReact','Jump','Death'].includes(name)?THREE.LoopOnce:THREE.LoopRepeat,Infinity);
   action.clampWhenFinished=true;data.characterAction=name;
+}
+function playWeaponCharacter(mesh,state){
+  const data=mesh.userData,actions=data.weaponActions;if(!actions?.size)return;
+  const armed=state.weapon==='pistol'||Boolean(GUN_MODELS[state.weapon]);
+  const name=state.weapon==='knife'?(state.attacking?'Sword':'SwordIdle'):
+    !armed?null:state.reloading?'PistolReload':state.attacking?'PistolShoot':'PistolIdle';
+  if(data.weaponAction===name)return;
+  const previous=actions.get(data.weaponAction);if(previous)previous.fadeOut(.1);
+  data.weaponAction=name;if(!name)return;
+  const action=actions.get(name);if(!action)return;
+  // This is an upper-body layer over a full-weight locomotion clip. A stronger
+  // weight prevents the base idle/run pose from averaging the hands back down.
+  action.reset().setEffectiveWeight(6).fadeIn(.1).play();action.setLoop(['PistolIdle','SwordIdle'].includes(name)?THREE.LoopRepeat:THREE.LoopOnce,Infinity);action.clampWhenFinished=true;
+}
+const firearmBoneOrigin=new THREE.Vector3(),firearmBoneDirection=new THREE.Vector3(),firearmTarget=new THREE.Vector3();
+const firearmRightGrip=new THREE.Vector3(),firearmLeftGrip=new THREE.Vector3(),firearmMount=new THREE.Vector3();
+const firearmParentQuaternion=new THREE.Quaternion(),firearmWorldQuaternion=new THREE.Quaternion(),firearmYAxis=new THREE.Vector3(0,1,0);
+function pointBoneAt(bone,target){
+  if(!bone?.parent)return;
+  bone.getWorldPosition(firearmBoneOrigin);firearmBoneDirection.copy(target).sub(firearmBoneOrigin).normalize();
+  firearmWorldQuaternion.setFromUnitVectors(firearmYAxis,firearmBoneDirection);
+  bone.parent.getWorldQuaternion(firearmParentQuaternion).invert();
+  bone.quaternion.copy(firearmParentQuaternion).multiply(firearmWorldQuaternion);
+  bone.updateMatrixWorld(true);
+}
+function poseCharacterFirearm(mesh,state){
+  const data=mesh.userData,firearm=state.weapon==='pistol'||Boolean(GUN_MODELS[state.weapon]);
+  if(!firearm||deduction.phase!=='idle')return;
+  if(data.universalVisual){
+    playWeaponCharacter(mesh,state);data.characterVisual?.updateMatrixWorld(true);
+    const hand=data.gun?.userData.visualHand,leftHand=data.characterVisual?.getObjectByName('hand_l');
+    if(hand&&data.gun){
+      const recoil=state.attacking?.07:0;
+      hand.getWorldPosition(firearmRightGrip);
+      // The imported weapon origin is its geometric centre, not its pistol
+      // grip. Put that centre between the animated hands, biased toward the
+      // trigger hand, so the handle sits in the right palm and the fore-end
+      // reaches the supporting left hand instead of floating at the body's side.
+      if(leftHand){leftHand.getWorldPosition(firearmLeftGrip);firearmMount.copy(firearmRightGrip).lerp(firearmLeftGrip,.32);}
+      else firearmMount.copy(firearmRightGrip);
+      data.gun.position.copy(mesh.worldToLocal(firearmMount));data.gun.position.y+=.03;data.gun.position.z+=.08+recoil;
+      const switching=state.switchingUntil&&performance.now()<state.switchingUntil;
+      const progress=switching?1-(state.switchingUntil-performance.now())/420:1;
+      const reveal=clamp((progress-.42)/.58,0,1);
+      data.gun.scale.setScalar(reveal);data.gun.rotation.set(state.reloading?-.16:(1-reveal)*.9,0,state.reloading?.12:0);
+    }
+    return;
+  }
+  const rightUpper=data.characterVisual?.getObjectByName('UpperArm.R');
+  const rightLower=data.characterVisual?.getObjectByName('LowerArm.R');
+  const leftUpper=data.characterVisual?.getObjectByName('UpperArm.L');
+  const leftLower=data.characterVisual?.getObjectByName('LowerArm.L');
+  const pitch=clamp(state.pitch||0,-.65,.65),kick=state.attacking?.12:0;
+  // Aim with explicit elbow/hand targets instead of guessed Euler axes. Pirate
+  // Kit arms extend along bone-local +Y, so this works consistently for every
+  // cadet and remains layered over Idle/Walk/Run.
+  const targetWorld=(x,y,z)=>mesh.localToWorld(firearmTarget.set(x,y,z));
+  if(state.reloading){
+    pointBoneAt(rightUpper,targetWorld(.58,2.12,.28));pointBoneAt(rightLower,targetWorld(.2,1.82,.52));
+    pointBoneAt(leftUpper,targetWorld(-.54,2.08,.32));pointBoneAt(leftLower,targetWorld(.02,1.72,.5));
+  }else{
+    const aimY=2.18-pitch*.55-kick;
+    pointBoneAt(rightUpper,targetWorld(.58,2.16,.38));pointBoneAt(rightLower,targetWorld(.32,aimY,.92));
+    pointBoneAt(leftUpper,targetWorld(-.52,2.12,.42));pointBoneAt(leftLower,targetWorld(-.02,aimY-.05,.82));
+  }
+  data.characterVisual?.updateMatrixWorld(true);
+  if(data.gun){
+    const recoil=state.attacking?.13:0,drop=state.reloading?.2:0;
+    const hand=data.gun.userData.visualHand;
+    if(hand){
+      // LowerArm has no explicit hand bone; its finger children begin at y=.258,
+      // so this endpoint is the centre of the grip for every Pirate Kit cadet.
+      const gripWorld=hand.localToWorld(new THREE.Vector3(0,data.gun.userData.visualHandIsHand?0:.27,0));
+      data.gun.position.copy(mesh.worldToLocal(gripWorld));
+      data.gun.position.y-=drop;data.gun.position.z+=recoil;
+      // Gun +Z is the barrel direction after setRemoteWeapon's model correction.
+      // Keeping it in avatar space makes it follow aim while its grip stays on
+      // the animated hand, instead of inheriting the forearm's roll.
+      data.gun.rotation.set(state.reloading?.32:0,0,state.reloading?-.58:0);
+    }
+  }
+}
+function poseCharacterKnife(mesh,state){
+  const data=mesh.userData,knife=data.deductionKnife;
+  if(!knife)return;
+  const held=state.weapon==='knife'&&(deduction.phase==='idle'||inFfa()||deduction.role==='impostor');
+  knife.visible=held;if(!held)return;
+  if(data.universalVisual)playWeaponCharacter(mesh,state);
+  data.characterVisual?.updateMatrixWorld(true);
+  const hand=knife.userData.visualHand||data.characterVisual?.getObjectByName('hand_r');
+  if(!hand)return;
+  hand.getWorldPosition(firearmRightGrip);knife.position.copy(mesh.worldToLocal(firearmRightGrip));
+  knife.position.y-=.03;knife.position.z+=.22;
+  const switching=state.switchingUntil&&performance.now()<state.switchingUntil;
+  const progress=switching?1-(state.switchingUntil-performance.now())/420:1;
+  const reveal=clamp((progress-.42)/.58,0,1);
+  knife.scale.setScalar(reveal);knife.rotation.set(-.1+(1-reveal)*1.15,0,-.16);
 }
 // What other players are holding. This used to show the crude box gun only for
 // the free-roam pistol, so in Free-for-All every enemy appeared empty-handed
@@ -735,10 +859,12 @@ function animateRemoteCharacter(mesh,state,dt){
     data.characterMixer.update(dt);
     // The pirate kit has no firearm animation. Pose its right shoulder after
     // the mixer so aiming remains visible without replacing the walk cycle.
-    const shoulder=data.characterVisual?.getObjectByName('UpperArm.R');
-    if(shoulder&&state.weapon==='pistol'&&deduction.phase==='idle'){
-      shoulder.rotation.x-=(state.aiming||state.attacking)? .9 : .12;
-    }
+    // Add a two-handed firearm pose after the locomotion mixer. This preserves
+    // the authored walk/run clips while making the upper body actually carry
+    // and aim every FFA weapon. The reload pose is deliberately broad enough
+    // to read from the third-person camera and for remote players.
+    poseCharacterFirearm(mesh,state);
+    poseCharacterKnife(mesh,state);
     // Look where they are aiming. The mixer rewrites bone rotations every frame,
     // so this is applied additively after the update. Sign is measured, not
     // guessed: the head bone's local +Z is the face direction, and decreasing
@@ -762,14 +888,14 @@ function animateRemoteCharacter(mesh,state,dt){
   data.arms[0].rotation.x+=(leftTarget-data.arms[0].rotation.x)*armBlend;
   data.arms[1].rotation.x+=(rightTarget-data.arms[1].rotation.x)*armBlend;
   setRemoteWeapon(mesh,state.weapon);
-  if(data.deductionKnife)data.deductionKnife.visible=state.weapon==='knife';
+  if(data.deductionKnife&&!data.characterMixer)data.deductionKnife.visible=state.weapon==='knife';
 }
 function attachCharacterGun(mesh){
   const gun=new THREE.Group();
   box(gun,0,0,.22,.25,.22,.72,mats.dark,false);
   box(gun,0,-.18,-.04,.21,.38,.22,mats.dark,false);
   box(gun,0,.15,-.02,.31,.08,.36,mats.white,false);
-  gun.position.set(0,-1.1,.25);mesh.userData.arms[1].add(gun);
+  gun.position.set(.72,1.52,.25);mesh.add(gun);
   mesh.userData.gun=gun;
   return gun;
 }
@@ -782,10 +908,29 @@ function createFfaViewmodel(){
   // Held low and right, canted inward: the barrel runs toward the centre of
   // the screen instead of standing straight up the middle.
   root.position.set(.62,-.52,-1.12);root.rotation.set(-.05,-.13,.04);
-  const hands=new THREE.Group();box(hands,-.11,-.04,-.16,.10,.09,.12,skin,false);box(hands,.11,-.04,-.16,.10,.09,.12,skin,false);root.add(hands);
-  const weapon=new THREE.Group();root.add(weapon);root.userData.weapon=weapon;root.visible=false;camera.add(root);scene.add(camera);return root;
+  const hands=new THREE.Group(),leftHand=box(hands,-.11,-.04,-.16,.10,.09,.12,skin,false),rightHand=box(hands,.11,-.04,-.16,.10,.09,.12,skin,false);root.add(hands);
+  const weapon=new THREE.Group();root.add(weapon);root.userData.weapon=weapon;root.userData.leftArm=left;root.userData.rightArm=right;root.userData.leftHand=leftHand;root.userData.rightHand=rightHand;root.visible=false;camera.add(root);scene.add(camera);return root;
 }
 const ffaViewmodel=createFfaViewmodel();
+
+// The source guns are intentionally kept as a single mesh for download size.
+// A lightweight magazine proxy supplies the one moving part players need to
+// understand reload timing. It is removed, lowered, replaced, and seated while
+// the authoritative server deadline remains the source of truth.
+function addViewMagazine(kind){
+  const weapon=ffaViewmodel.userData.weapon;
+  for(const key of ['magazine','replacementMagazine'])if(weapon.userData[key]){weapon.remove(weapon.userData[key]);weapon.userData[key]=null;}
+  if(['knife','bazooka','shotgun'].includes(kind))return;
+  const long=['smg','rifle','arc'].includes(kind),makeMagazine=()=>{
+    const magazine=new THREE.Group(),body=new THREE.Mesh(new THREE.BoxGeometry(long?.2:.16,long?.48:.31,long?.23:.18),new THREE.MeshBasicMaterial({color:0x1b252b}));
+    body.rotation.x=long?-.14:0;magazine.add(body);
+    const stripe=new THREE.Mesh(new THREE.BoxGeometry(long?.205:.165,.045,long?.235:.185),new THREE.MeshBasicMaterial({color:0x55dff2}));stripe.position.y=long?.13:.08;stripe.rotation.x=body.rotation.x;magazine.add(stripe);return magazine;
+  },magazine=makeMagazine(),replacementMagazine=makeMagazine();
+  magazine.position.set(.02,long?-.19:-.14,long?-.18:-.12);
+  magazine.userData.home=magazine.position.clone();
+  replacementMagazine.visible=false;
+  weapon.add(magazine,replacementMagazine);weapon.userData.magazine=magazine;weapon.userData.replacementMagazine=replacementMagazine;
+}
 // Scoping narrows the field of view, hides the viewmodel behind the optic, and
 // slows the look so the magnified view stays controllable. Firing is untouched:
 // the shot still goes through the same path, so a scoped sniper can shoot.
@@ -990,6 +1135,7 @@ function setFfaViewWeapon(kind,force=false){
   if(!force&&ffaViewmodel.userData.kind===kind)return;
   ffaViewmodel.userData.kind=kind;
   weapon.clear();
+  weapon.userData.magazine=null;weapon.userData.replacementMagazine=null;
   const dark=new THREE.MeshBasicMaterial({color:0x17242b}),metal=new THREE.MeshBasicMaterial({color:0x49626b}),accent=new THREE.MeshBasicMaterial({color:0xd39b42});
   const length={pistol:.72,smg:1.12,rifle:1.48,shotgun:1.58,sniper:1.72}[kind]||1;
   if(kind==='knife'){
@@ -1011,19 +1157,34 @@ function setFfaViewWeapon(kind,force=false){
       weapon.clear();
       weapon.add(instance);
       if(flare){weapon.add(flare);weapon.userData.muzzle=flare;}
+      addViewMagazine(kind);
     }).catch(()=>{});
   }
   const flareMaterial=new THREE.MeshBasicMaterial({color:0xffd26a,transparent:true,opacity:.95,blending:THREE.AdditiveBlending,depthWrite:false}),muzzle=new THREE.Group();
   const flame=new THREE.Mesh(new THREE.ConeGeometry(.16,.55,6),flareMaterial);flame.rotation.x=-Math.PI/2;flame.position.z=-.25;muzzle.add(flame);
   muzzle.add(new THREE.Mesh(new THREE.SphereGeometry(.13,6,4),flareMaterial.clone()));muzzle.position.set(0,.03,-(.42+length*.52));muzzle.visible=false;weapon.add(muzzle);weapon.userData.muzzle=muzzle;
   weapon.position.set(.02,.02,-.05);
+  weapon.userData.home=weapon.position.clone();
+  addViewMagazine(kind);
 }
 const characterLoader=new GLTFLoader();
+let universalAnimationPromise=null;
+function loadUniversalAnimations(){
+  if(!universalAnimationPromise)universalAnimationPromise=new Promise(resolve=>characterLoader.load('/models/universal/UAL1_Standard.glb',gltf=>resolve(gltf.animations||[]),undefined,error=>{console.warn('Universal animation library unavailable.',error);resolve([]);}));
+  return universalAnimationPromise;
+}
+const universalAnimationNames={Idle_Loop:'Idle',Walk_Loop:'Walk',Sprint_Loop:'Run',Jump_Loop:'Jump',Punch_Jab:'Punch',Death01:'Death',Hit_Chest:'HitReact',Sword_Attack:'Sword',Sword_Idle:'SwordIdle',Pistol_Idle_Loop:'PistolIdle',Pistol_Shoot:'PistolShoot',Pistol_Reload:'PistolReload'};
 // Every one of these used to start the moment the module was evaluated, which
 // is why the menu took twenty seconds to appear: ten large downloads and their
 // decoding saturated the main thread before anything could paint. They are now
 // started deliberately by the boot sequence, which can report progress.
-const loadPirate=name=>new Promise(resolve=>characterLoader.load(`/models/pirates/Characters_${name}.gltf`,gltf=>{
+const loadPirate=async name=>{
+  const universalFile=UNIVERSAL_CHARACTERS[name],animations=universalFile?await loadUniversalAnimations():null;
+  return new Promise(resolve=>characterLoader.load(universalFile?`/models/universal/${universalFile}.gltf`:`/models/pirates/Characters_${name}.gltf`,gltf=>{
+  if(universalFile){
+    gltf.animations=animations.filter(clip=>universalAnimationNames[clip.name]).map(clip=>{const copy=clip.clone();copy.name=universalAnimationNames[clip.name];return copy;});
+    gltf.userData={...(gltf.userData||{}),universal:true};
+  }
   characterTemplates.set(name,gltf);
   if(name==='Sharky')mountMenuSharky();
   createPiratePortrait(name,gltf);
@@ -1031,7 +1192,8 @@ const loadPirate=name=>new Promise(resolve=>characterLoader.load(`/models/pirate
   if(characterChoice===name)showPiratePreview(name);
   multiplayer?.refreshCharacters?.();
   resolve(true);
-},undefined,error=>{console.warn(`Pirate character ${name} unavailable; using built-in character.`,error);resolve(false);}));
+},undefined,error=>{console.warn(`Character ${name} unavailable; using built-in character.`,error);resolve(false);}));
+};
 const womenNames=['Female_Casual','Female_Dress','Female_Alternative','Female_TankTop'];
 const womenTemplates=new Map(),womenLoader=new FBXLoader();
 function attachWomanModel(mesh,name){
@@ -1141,6 +1303,14 @@ const deduction={phase:'idle',role:null,mapName:'',bots:[],bodies:[],tasks:[],ta
 // Which weapons carry optics, and how far they magnify.
 const FFA_SCOPES={sniper:{zoom:3.4,fov:22,label:'3.4x'},rifle:{zoom:1.35,fov:46,label:'1.35x'}};
 const ffa={phase:'idle',mapId:'it-park',startsAt:0,scoped:false,snapshot:null,primary:'smg',returnToLobby:false,spawnIndex:0,deadUntil:0,lastShotId:0,lastTick:0,recoil:0,muzzleUntil:0,claimSent:null,lockedCharacter:null,firstBloodShown:false};
+let ffaPingAt=0,ffaPingBusy=false;
+function updateFfaPing(){
+  if(!inFfa()||ffaPingBusy||performance.now()-ffaPingAt<5000)return;
+  ffaPingAt=performance.now();ffaPingBusy=true;const started=performance.now();
+  fetch('/api/health',{cache:'no-store'}).then(response=>{if(!response.ok)throw Error();return response.text();})
+    .then(()=>{$('ffa-ping').textContent=`● ${Math.max(1,Math.round(performance.now()-started))} MS`;})
+    .catch(()=>{$('ffa-ping').textContent='● OFFLINE';}).finally(()=>{ffaPingBusy=false;});
+}
 const inFfa=()=>ffa.phase!=='idle';
 const OFFICE_CENTER_X=300,officeArena=new THREE.Group(),officeWalls=[],officeSolidMeshes=[];
 officeArena.visible=false;scene.add(officeArena);
@@ -1404,7 +1574,10 @@ function createKnife(){
 }
 function attachCharacterKnife(mesh){
   if(mesh.userData.deductionKnife)return mesh.userData.deductionKnife;
-  const knife=createKnife();knife.position.set(.7,1.55,.48);knife.rotation.set(-.35,0,-.25);knife.visible=false;mesh.add(knife);mesh.userData.deductionKnife=knife;return knife;
+  const knife=createKnife();knife.position.set(.7,1.55,.48);knife.rotation.set(-.35,0,-.25);knife.visible=false;mesh.add(knife);mesh.userData.deductionKnife=knife;
+  const visual=mesh.userData.characterVisual;
+  if(visual)knife.userData.visualHand=visual.getObjectByName('hand_r')||visual.getObjectByName('LowerArm.R')||null;
+  return knife;
 }
 function applyDeductionLoadout(reset=false){
   if(!player||deduction.phase==='idle')return;
@@ -1415,7 +1588,7 @@ function applyDeductionLoadout(reset=false){
 }
 function setDeductionWeapon(kind){
   if(deduction.phase!=='play'||deduction.role!=='impostor')return;
-  player.weapon=kind;player.mesh.userData.gun.visible=false;
+  player.weapon=kind;player.weaponSwitchUntil=performance.now()+420;player.mesh.userData.gun.visible=false;
   attachCharacterKnife(player.mesh);
   player.mesh.userData.deductionKnife.visible=kind==='knife';player.hudUntil=performance.now()+2500;updateUI();
 }
@@ -2054,7 +2227,7 @@ const multiplayer=createMultiplayer({
       // Quantised so a resting hand does not resend state every frame, and only
       // sent in Free-for-All, where the camera is the player's own eyes.
       pitch:inFfa()?Math.round(clamp(camPitch,-1.35,1.35)*50)/50:0,
-      attacking,attackArm:player.attackArm
+      attacking,reloading:Boolean(player.reloadingUntil),attackArm:player.attackArm
     };
   }
 });
@@ -2102,7 +2275,7 @@ for(const [part,choices] of [...Object.entries(STYLE_OPTIONS).map(([key,values])
 drawStylePreview();
 $('character-choice').value=characterChoice;
 $('character-choice').addEventListener('change',()=>{
-  characterChoice=PIRATE_CHARACTERS.includes($('character-choice').value)?$('character-choice').value:'Henry';
+  characterChoice=PLAYER_CHARACTERS.includes($('character-choice').value)?$('character-choice').value:'Atlas';
   try{localStorage.setItem('districtZeroCharacter',characterChoice);}catch{}
   if(player){player.character=characterChoice;attachCharacterModel(player.mesh,characterChoice);}
   multiplayer.refreshCharacters?.();
@@ -2144,7 +2317,7 @@ for(const [id,key] of [['crosshair-size','crosshairSize'],['crosshair-opacity','
 }
 $('crosshair-shape').value=settings.crosshairShape;$('crosshair-shape').onchange=event=>{settings.crosshairShape=event.target.value;applySettings();saveSettings();};
 $('crosshair-color').value=settings.crosshairColor;$('crosshair-color').oninput=event=>{settings.crosshairColor=event.target.value;applySettings();saveSettings();};
-function openDistrictMap(){if(playing)showOverlay();$('district-map-panel').hidden=false;$('settings-panel').hidden=true;$('customize-panel').hidden=true;const map=$('district-map');drawDistrictMap(map.getContext('2d'),map.width,map.height,true);$('district-map-panel').scrollIntoView({block:'nearest'});}
+function openDistrictMap(){if(playing)showOverlay();document.body.classList.add('district-map-open');$('pause-menu').hidden=true;$('district-map-panel').hidden=false;$('settings-panel').hidden=true;$('customize-panel').hidden=true;const map=$('district-map');drawDistrictMap(map.getContext('2d'),map.width,map.height,true);}
 $('mapBtn').onclick=openDistrictMap;$('open-map').onclick=openDistrictMap;
 $('settingsBtn').onclick=()=>{$('district-map-panel').hidden=true;$('settings-panel').hidden=!$('settings-panel').hidden;$('customize-panel').hidden=true;waitingForBinding=null;renderBindings();};
 applySettings();renderBindings();
@@ -2159,10 +2332,11 @@ function newGame(){
     $('deduction-role').hidden=true;$('meeting-panel').hidden=true;$('ship-status').hidden=true;$('task-panel').hidden=true;document.body.classList.remove('lights-out','comms-out','deduction-mode');
   }
   clearDynamic();activityManager.reset();wanted={heat:0,level:0,last:{...SPAWN}};worldTime=worldClockNow();cash=account.money??150;streetRep=account.streetRep??0;engineLevel=account.engineLevel??0;completedJobs=account.completedJobs??0;job=null;objectiveMesh.visible=false;taxiPassenger.visible=false;cheatBuffer='';
-  player={...safePoint(SPAWN),h:0,y:0,vy:0,vx:0,vz:0,grounded:true,lastGroundedAt:performance.now(),jumpQueuedUntil:0,health:MAX_HEALTH,ammo:12,reserve:24,inCar:null,inAircraft:null,jetpack:false,character:characterChoice,shotAt:0,weapon:'pistol',attackUntil:0,attackArm:0,mesh:avatar(mats.shirt,false,appearance)};
+  player={...safePoint(SPAWN),h:0,y:0,vy:0,vx:0,vz:0,grounded:true,lastGroundedAt:performance.now(),jumpQueuedUntil:0,health:MAX_HEALTH,ammo:12,reserve:24,inCar:null,inAircraft:null,jetpack:false,character:characterChoice,shotAt:0,weapon:'pistol',weaponSwitchUntil:0,attackUntil:0,attackArm:0,mesh:avatar(mats.shirt,false,appearance)};
   attachCharacterGun(player.mesh);
   player.mesh.userData.jetpack=createJetpackMesh();player.mesh.userData.jetpack.visible=false;player.mesh.add(player.mesh.userData.jetpack);
   attachCharacterModel(player.mesh,characterChoice);
+  attachCharacterKnife(player.mesh);
   player.mesh.position.set(player.x,0,player.z);scene.add(player.mesh);
   carSpawns.forEach((s,i)=>{const c={id:i,x:s.x,z:s.z,h:s.h,speed:0,steer:0,mesh:carMesh(s.c,s.type),occupied:false};c.mesh.position.set(c.x,0,c.z);c.mesh.rotation.y=c.h;scene.add(c.mesh);cars.push(c);});
   for(let i=0;i<9;i++){const route=trafficRoutes[i%trafficRoutes.length],startIndex=Math.floor(i/3*route.length/3+i*2)%route.length,start=route[startIndex],t={x:start.x,z:start.z,h:0,speed:7+i%4,route,wp:(startIndex+1)%route.length,mesh:carMesh([0x8b9b8f,0xb99473,0x7b8794,0x698a9b,0xa78264,0xc4ac83][i%6])};t.mesh.scale.set(.84,.9,.84);t.mesh.position.set(t.x,0,t.z);scene.add(t.mesh);traffic.push(t);}
@@ -2205,7 +2379,7 @@ function loadGame(){
 function refreshSaveButtons(){const has=Boolean(account)&&!!localStorage.getItem('districtZeroSave');$('continueBtn').disabled=!has;$('loadBtn').disabled=!has;}
 function setGameplayUi(active){document.body.classList.toggle('gameplay-active',Boolean(active));}
 function showOverlay(){setGameplayUi(false);document.body.classList.add('menu-open');const matchPause=playing&&(deduction.phase!=='idle'||inFfa());paused=true;aiming=false;multiplayer.closeChat();$('crosshair').hidden=true;document.body.classList.toggle('deduction-pause',matchPause);document.body.classList.toggle('pause-menu-open',playing&&!lobbyVisible());if(document.pointerLockElement===canvas)document.exitPointerLock();$('overlay').hidden=false;$('pause-menu').hidden=!playing||lobbyVisible();$('exit-deduction').hidden=true;$('resumeBtn').hidden=true;$('saveBtn').hidden=true;$('loadBtn').hidden=true;refreshSaveButtons();}
-function hideOverlay(){document.body.classList.remove('menu-open','pause-menu-open');paused=false;document.body.classList.remove('deduction-pause');$('pause-menu').hidden=true;$('overlay').hidden=true;setGameplayUi(playing&&!lobbyVisible());}
+function hideOverlay(){document.body.classList.remove('menu-open','pause-menu-open','district-map-open');paused=false;document.body.classList.remove('deduction-pause');$('pause-menu').hidden=true;$('district-map-panel').hidden=true;$('map-backdrop').hidden=true;$('overlay').hidden=true;setGameplayUi(playing&&!lobbyVisible());}
 function toast(message){const el=$('toast');el.textContent=message;el.hidden=false;toastTimer=3.5;}
 function near(a,b,r){return dist(a,b)<r;}
 function activePosition(){return player.inAircraft||player.inCar||player;}
@@ -2351,7 +2525,7 @@ function spawnPolice(){
   const spot=spots.sort((a,b)=>Math.abs(dist(a,base)-35)-Math.abs(dist(b,base)-35)).find(s=>!collides(s.x,s.z,1))||spots[0];
   const p={x:spot.x,z:spot.z,h:0,state:'investigate',lost:0,health:3,mesh:avatar(mats.police,true)};p.mesh.position.set(p.x,0,p.z);scene.add(p.mesh);police.push(p);
 }
-function setWeapon(kind){if(!playing||paused||player.inCar||player.inAircraft)return;player.weapon=kind;player.reloadingUntil=0;player.hudUntil=performance.now()+3500;player.mesh.userData.gun.visible=kind==='pistol';aiming=false;$('crosshair').hidden=true;updateUI();}
+function setWeapon(kind){if(!playing||paused||player.inCar||player.inAircraft||kind===player.weapon)return;player.weapon=kind;player.weaponSwitchUntil=performance.now()+420;player.reloadingUntil=0;player.hudUntil=performance.now()+3500;player.mesh.userData.gun.visible=kind==='pistol';aiming=false;$('crosshair').hidden=true;weaponSwitchSound();updateUI();}
 function hitCharacter(entity,damage){
   const now=performance.now();
   entity.health=(entity.health??(police.includes(entity)?3:2))-damage;
@@ -2511,6 +2685,8 @@ function updatePlayer(dt,t){
     const pace=Math.hypot(player.vx,player.vz);
     const state=player.inCar||player.inAircraft||player.jetpack&&player.y>.15?'Idle':!player.grounded?'Jump':performance.now()<player.attackUntil&&player.weapon==='fists'?'Punch':pace>11?'Run':pace>.8?'Walk':'Idle';
     playCharacter(player.mesh,state);player.mesh.userData.characterMixer.update(dt);
+    const characterState={weapon:player.weapon,pitch:camPitch,aiming,reloading:Boolean(player.reloadingUntil),attacking:performance.now()<player.attackUntil,switchingUntil:player.weaponSwitchUntil};
+    poseCharacterFirearm(player.mesh,characterState);poseCharacterKnife(player.mesh,characterState);
   }
   if(player.health<=0){
     toast('You were injured. Returning to the district start.');player.health=MAX_HEALTH;
@@ -2651,9 +2827,41 @@ function updateCamera(dt){
       // action rather than a frozen lowered gun.
       if(reloadProgress>.38&&reloadProgress<.62)reloadDrop+=Math.sin((reloadProgress-.38)/.24*Math.PI)*.08;
     }
-    const targetX=(aiming?.10:.62)+sway*(aiming?.3:1)+reloadSide,targetY=(aiming?-.54:-.52)+bob-ffa.recoil*.045-reloadDrop,targetZ=-1.12+ffa.recoil*.24+.08*reloadDrop,blend=1-Math.exp(-dt*18);
+    // Drop the old weapon out of frame, swap at the midpoint, then bring the
+    // selected blade/firearm back into the hands. This makes Q/number changes
+    // readable in first person instead of popping models instantly.
+    const switchRemaining=Math.max(0,(player.weaponSwitchUntil||0)-performance.now());
+    const switchProgress=switchRemaining?1-switchRemaining/420:1;
+    const switchDrop=switchRemaining?Math.sin(switchProgress*Math.PI)*.72:0;
+    const switchRoll=switchRemaining?Math.sin(switchProgress*Math.PI)*.42:0;
+    const targetX=(aiming?.10:.62)+sway*(aiming?.3:1)+reloadSide,targetY=(aiming?-.54:-.52)+bob-ffa.recoil*.045-reloadDrop-switchDrop,targetZ=-1.12+ffa.recoil*.24+.08*reloadDrop,blend=1-Math.exp(-dt*18);
     ffaViewmodel.position.x+=(targetX-ffaViewmodel.position.x)*blend;ffaViewmodel.position.y+=(targetY-ffaViewmodel.position.y)*blend;ffaViewmodel.position.z+=(targetZ-ffaViewmodel.position.z)*blend;
-    ffaViewmodel.rotation.x+=((-.05+reloadPitch)-ffaViewmodel.rotation.x)*blend;ffaViewmodel.rotation.y+=((-.13+reloadRoll*.18)-ffaViewmodel.rotation.y)*blend;ffaViewmodel.rotation.z+=(((aiming?.15:1)*sway+reloadRoll)-ffaViewmodel.rotation.z)*blend;
+    ffaViewmodel.rotation.x+=((-.05+reloadPitch)-ffaViewmodel.rotation.x)*blend;ffaViewmodel.rotation.y+=((-.13+reloadRoll*.18)-ffaViewmodel.rotation.y)*blend;ffaViewmodel.rotation.z+=(((aiming?.15:1)*sway+reloadRoll+switchRoll)-ffaViewmodel.rotation.z)*blend;
+    const viewWeapon=ffaViewmodel.userData.weapon,weaponHome=viewWeapon.userData.home||new THREE.Vector3(.02,.02,-.05);
+    viewWeapon.position.copy(weaponHome);viewWeapon.position.z+=ffa.recoil*.38;viewWeapon.position.y-=ffa.recoil*.06;
+    viewWeapon.rotation.x=ffa.recoil*.14;viewWeapon.rotation.z=-ffa.recoil*.05;
+    const magazine=viewWeapon.userData.magazine,replacement=viewWeapon.userData.replacementMagazine,leftHand=ffaViewmodel.userData.leftHand,rightHand=ffaViewmodel.userData.rightHand,leftArm=ffaViewmodel.userData.leftArm,rightArm=ffaViewmodel.userData.rightArm;
+    const handKick=ffa.recoil*.16;
+    leftHand.position.set(-.11+sway*.8,-.04+bob*.7,-.16+handKick*.55);rightHand.position.set(.11+sway*.55,-.04+bob*.55,-.16+handKick);
+    leftArm.position.set(-.13+sway*.45,-.10+bob*.35,.10+handKick*.35);rightArm.position.set(.14+sway*.35,-.10+bob*.3,.10+handKick*.8);
+    leftArm.rotation.x=-.12-ffa.recoil*.08;leftArm.rotation.z=sway*1.8;rightArm.rotation.x=-.12-ffa.recoil*.18;rightArm.rotation.z=-sway*1.4;
+    if(magazine){
+      const home=magazine.userData.home;
+      magazine.visible=!reloadRemaining||reloadProgress<.43;
+      const travel=reloadRemaining?clamp((reloadProgress-.14)/.29,0,1):0;
+      magazine.position.copy(home);magazine.position.y-=travel*.46;magazine.position.x-=travel*.1;
+      magazine.rotation.z=travel*.28;
+      if(replacement){
+        const inserting=reloadRemaining&&reloadProgress>=.48&&reloadProgress<.84;
+        replacement.visible=inserting;
+        const insert=clamp((reloadProgress-.48)/.36,0,1);
+        replacement.position.copy(home).add(new THREE.Vector3(-.34*(1-insert),-.48*(1-insert),.08));
+        replacement.rotation.z=-.32*(1-insert);
+      }
+      const reach=reloadRemaining?Math.sin(clamp((reloadProgress-.1)/.78,0,1)*Math.PI):0;
+      leftHand.position.set(-.11+reach*.17+sway*.8,-.04-reach*.24+bob*.7,-.16-reach*.08);
+      leftArm.rotation.x=-.12-reach*.42;leftArm.rotation.z=reach*.28;
+    }
     const muzzle=ffaViewmodel.userData.weapon.userData.muzzle;if(muzzle){muzzle.visible=performance.now()<ffa.muzzleUntil;if(muzzle.visible)muzzle.rotation.z=Math.random()*Math.PI*2;}
     // The optic has its own reticle; this ran every frame and put the normal
     // crosshair back on top of it.
@@ -2678,6 +2886,7 @@ function updateCamera(dt){
 }
 function updateUI(){if(!player)return;
   const now=performance.now();
+  if(inFfa())updateFfaPing();
   if(player.health<lastUiHealth-.1&&now-lastDamageFlash>450){const flash=$('damage-flash');flash.classList.remove('show');void flash.offsetWidth;flash.classList.add('show');lastDamageFlash=now;}
   lastUiHealth=player.health;
   $('health-value').textContent=Math.ceil(player.health);$('health-bar').style.width=`${player.health/(inFfa()?100:MAX_HEALTH)*100}%`;$('wanted-stars').textContent='★'.repeat(wanted.level)+'☆'.repeat(2-wanted.level);
@@ -2824,7 +3033,17 @@ function drawDistrictMap(context,w,h,labels=false){
     for(const p of landmarks){const x=X(p.x),y=Z(p.z);context.fillStyle='#10272d';context.fillRect(x-4,y-4,8,8);label(p.name,x,y-9,'#fff1cb','bold 11px sans-serif');}
     context.textAlign='left';context.font='bold 12px sans-serif';context.fillStyle='#fff1cb';context.fillText('N ↑',12,22);
   }
-  if(player){context.save();context.translate(X(player.x),Z(player.z));context.rotate(-(player.inCar?.h??player.h));context.fillStyle='#fff';context.beginPath();context.moveTo(0,labels?8:5);context.lineTo(-4,-4);context.lineTo(4,-4);context.closePath();context.fill();context.restore();}
+  if(player){
+    context.save();context.translate(X(player.x),Z(player.z));
+    if(labels){
+      context.fillStyle='#00e3fd';context.strokeStyle='#07151d';context.lineWidth=4;
+      context.beginPath();context.arc(0,0,9,0,Math.PI*2);context.fill();context.stroke();
+      context.fillStyle='#fff';context.beginPath();context.arc(0,0,3,0,Math.PI*2);context.fill();
+    }else{
+      context.rotate(-(player.inCar?.h??player.h));context.fillStyle='#fff';context.beginPath();context.moveTo(0,5);context.lineTo(-4,-4);context.lineTo(4,-4);context.closePath();context.fill();
+    }
+    context.restore();
+  }
   if(radar){context.fillStyle='#f8dfad';context.font='bold 12px sans-serif';context.textAlign='center';context.fillText('N',w/2,17);context.restore();}
   // Gunfire last so it sits above the streets and markers.
   drawGunfireBlips(context,w,h,toCanvas,radar);
@@ -3145,6 +3364,7 @@ function applyFfaWeapon(){
   const mine=ffa.snapshot?.you;if(!mine)return;
   const hint=$('ffa-ammo-hint');
   if(hint)hint.textContent=mine.hasDrop?'R RELOAD · G BAZOOKA · 1-2 SWITCH':'R RELOAD · 1-4 SWITCH';
+  if(player.weapon!==mine.weapon)player.weaponSwitchUntil=performance.now()+420;
   ffa.primary=mine.primary;player.weapon=mine.weapon;player.ammo=mine.magazine;player.reserve=mine.reserve;player.reloadingUntil=mine.reloadingUntil||0;player.hudUntil=performance.now()+1200;
   if(player.mesh.userData.gun)player.mesh.userData.gun.visible=false;
   setFfaViewWeapon(mine.weapon);
@@ -3153,7 +3373,9 @@ function applyFfaWeapon(){
 function startFfa(setup){
   activityManager.cancel('Activity ended when you joined a match');
   ffa.startsAt=setup.startsAt||0;
-  ffa.phase='countdown';ffa.snapshot=null;ffa.primary='smg';ffa.returnToLobby=false;ffa.spawnIndex=0;ffa.deadUntil=0;ffa.recoil=0;ffa.muzzleUntil=0;ffa.lockedCharacter=characterChoice;ffa.firstBloodShown=false;
+  const me=multiplayer.getLocalId?.(),selectedCharacter=setup.roster?.find(member=>member.id===me)?.character;
+  ffa.phase='countdown';ffa.snapshot=null;ffa.primary='smg';ffa.returnToLobby=false;ffa.spawnIndex=0;ffa.deadUntil=0;ffa.recoil=0;ffa.muzzleUntil=0;ffa.lockedCharacter=PLAYER_CHARACTERS.includes(selectedCharacter)?selectedCharacter:characterChoice;ffa.firstBloodShown=false;
+  characterChoice=ffa.lockedCharacter;player.character=ffa.lockedCharacter;attachCharacterModel(player.mesh,ffa.lockedCharacter);
   setFfaMap(setup.mapId||'it-park');
   if(player.inCar)exitCar(true);if(player.inAircraft)exitAircraft(true);player.jetpack=false;job=null;setObjective(null);setDeductionWorld(true);
   multiplayer.setCommunicationAllowed?.(false);voice.setCommunicationAllowed(false);
@@ -3165,7 +3387,7 @@ function startFfa(setup){
     'melee-knife','melee-knife-2','fire-pistol','fire-smg','fire-rifle','fire-shotgun'];
   primeSamples(combatSamples);for(const name of combatSamples)settleSample(name);
   const rewardLine=$('ffa-reward');if(rewardLine){rewardLine.hidden=true;rewardLine.textContent='';}
-  $('ffa-hud').hidden=false;$('crosshair').hidden=false;
+  $('ffa-hud').hidden=false;$('crosshair').hidden=false;$('ffa-ping').hidden=false;ffaPingAt=0;updateFfaPing();
   $('ffa-vitals').hidden=false;$('ffa-ammo').hidden=false;
   document.body.classList.add('ffa-mode');hideOverlay();playMusic('match');toast('FREE-FOR-ALL · get ready');
 }
@@ -3178,7 +3400,7 @@ function leaveFfa(){
   multiplayer.setCommunicationAllowed?.(true);voice.setCommunicationAllowed(true);for(const seat of roster)multiplayer.setPeerAlive?.(seat.id,true);multiplayer.setRoomPeers?.(null);
   multiplayer.setNameTagsVisible?.(true);
   setFfaScope(false);
-  $('ffa-hud').hidden=true;$('ffa-scoreboard').hidden=true;$('ffa-results').hidden=true;$('crosshair').hidden=true;
+  $('ffa-hud').hidden=true;$('ffa-scoreboard').hidden=true;$('ffa-results').hidden=true;$('crosshair').hidden=true;$('ffa-ping').hidden=true;
   $('ffa-vitals').hidden=true;$('ffa-ammo').hidden=true;$('ffa-scope').hidden=true;
   document.body.classList.remove('ffa-mode');
   if(back){
@@ -3713,6 +3935,7 @@ let lookPointer_x=0,lookPointer_y=0,touchFiring=false;
 function reloadFfa(){if(!inFfa()||ffa.deadUntil||player.reloadingUntil)return;setFfaScope(false);multiplayer.ffaAction?.('reload').catch(error=>toast(error.message));}
 function switchFfa(weapon){
   if(!inFfa()||ffa.deadUntil||weapon===player.weapon)return;
+  player.weaponSwitchUntil=performance.now()+420;
   weaponSwitchSound();
   multiplayer.ffaAction?.('switch',{weapon}).catch(error=>toast(error.message));
 }
@@ -4267,7 +4490,7 @@ $('lobby-ready').onclick=()=>{
 };
 $('lobby-character-grid').addEventListener('click',event=>{
   const button=event.target.closest('button[data-character]');if(!button)return;
-  characterChoice=PIRATE_CHARACTERS.includes(button.dataset.character)?button.dataset.character:'Henry';
+  characterChoice=PLAYER_CHARACTERS.includes(button.dataset.character)?button.dataset.character:'Atlas';
   $('character-choice').value=characterChoice;
   try{localStorage.setItem('districtZeroCharacter',characterChoice);}catch{}
   if(player){player.character=characterChoice;attachCharacterModel(player.mesh,characterChoice);}

@@ -47,6 +47,8 @@
 .mini-map span{position:absolute;left:50%;bottom:-26px;transform:translateX(-50%);white-space:nowrap;max-width:190px;background:#0a1719d9;padding:4px 12px;border-radius:20px;color:#f1f4dc;font-size:10px;text-shadow:none;text-align:center}
 .map-button{margin-top:24px;padding:4px 10px;border:0;background:#14272acc;border-radius:20px;color:#f3db9d;letter-spacing:.1em;font-size:9px;box-shadow:0 3px 9px #0007}
 .map-button:hover{background:#264147}.map-credit{font-size:8px;opacity:.8}
+.ffa-ping{margin-top:27px;padding:3px 9px;border-radius:999px;background:#09181dcc;color:#78e4f2;font:800 8px 'Barlow Condensed',sans-serif;letter-spacing:.12em;box-shadow:0 3px 9px #0007}
+.ffa-mode .hud-left{display:none!important}.ffa-mode .radar-cluster .map-button,.ffa-mode .radar-cluster .map-credit,.ffa-mode .mini-map span{display:none!important}.ffa-mode .ffa-ping{display:block!important}
 .hud-left{left:230px;bottom:30px;width:min(330px,calc(100vw - 560px));filter:drop-shadow(0 2px 10px #000b)}
 .free-roam-card{padding:10px 15px;background:linear-gradient(90deg,#09181dde,#0c202787 80%,transparent);border:0;border-radius:12px 24px 24px 12px;box-shadow:none}
 .free-roam-card h2{font-size:27px;margin:3px 0}.free-roam-card p{font-size:11px;line-height:1.35;color:#e3e9e4}.eyebrow{font-size:9px;color:#ead18c}
