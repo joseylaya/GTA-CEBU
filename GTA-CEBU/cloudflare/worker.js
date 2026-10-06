@@ -1,6 +1,7 @@
 import {sanitizeRoomName,clampNpcCount,publicRoom,roomSummary,startBlocker,assignRoles,roomMode,ffaLoadout,ffaDuration,ffaMap,joinableRoom,listableRoom,ROOM_MAX_PLAYERS} from '../api/_rooms.js';
 import {createRound,applyKill,openMeeting,castVote,advanceMeeting,resolveVote,publicRound} from '../api/_rounds.js';
 import {registerPlayer,loginPlayer,playerForToken,logoutPlayer,restRpc} from '../api/_accounts.js';
+import {wardrobeForToken,saveWardrobe} from '../api/_cosmetics.js';
 import {createFfaRound,publicFfa,ffaShot,ffaMelee,ffaReload,ffaSwitch,advanceFfa,ffaSetPrimary,ffaSetOnline,ffaJoinRound,ffaClaimDrop,ffaSnapshotPlan,FFA_WEAPONS} from '../api/_ffa.js';
 import {landmark} from '../src/geography.js';
 import {activityById} from '../src/activities.js';
@@ -636,6 +637,16 @@ async function accountRoute(request,env,url,origin){
       if(!player)return Response.json({error:'Not signed in'},{status:401,headers});
       return Response.json({player},{headers});
     }
+    if(url.pathname==='/api/appearance'&&request.method==='GET'){
+      const wardrobe=await wardrobeForToken(rpc,url.searchParams.get('token'));
+      if(!wardrobe)return Response.json({error:'Not signed in'},{status:401,headers});
+      return Response.json({wardrobe},{headers});
+    }
+    if(url.pathname==='/api/appearance'&&request.method==='POST'){
+      const wardrobe=await saveWardrobe(rpc,{token:body.token,character:body.character,appearance:body.appearance});
+      if(!wardrobe)return Response.json({error:'Not signed in'},{status:401,headers});
+      return Response.json({wardrobe},{headers});
+    }
   }catch(error){
     // Never hand a database message to the browser; it can carry SQL.
     console.warn('Account request failed:',error?.detail||error?.message);
@@ -644,7 +655,7 @@ async function accountRoute(request,env,url,origin){
   return Response.json({error:'Method not allowed'},{status:405,headers});
 }
 
-const ACCOUNT_PATHS=new Set(['/api/register','/api/login','/api/logout','/api/me']);
+const ACCOUNT_PATHS=new Set(['/api/register','/api/login','/api/logout','/api/me','/api/appearance']);
 
 export default {
   async fetch(request,env){

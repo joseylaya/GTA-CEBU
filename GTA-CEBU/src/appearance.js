@@ -4,7 +4,7 @@ export const APPEARANCE_OPTIONS={
   shirt:[['Amber',0xe6a74c],['Teal',0x49a7a2],['Coral',0xd97c6c],['Violet',0x9475bd],['White',0xe5e6db]],
   pants:[['Navy',0x253b49],['Charcoal',0x363b42],['Olive',0x67765a],['Sand',0xb29a78]]
 };
-export const STYLE_OPTIONS={top:['T-shirt','Hoodie','Jacket'],haircut:['Short','Tall','Cap']};
+export const STYLE_OPTIONS={top:['Cadet Suit','Peasant Outfit','Ranger Outfit'],haircut:['Short','Tall','Cap']};
 export const EMOTES={happy:'🙂',cool:'😎',sad:'😢',angry:'😠',love:'❤️',wave:'👋'};
 export function normalizeAppearance(value){
   const result={};

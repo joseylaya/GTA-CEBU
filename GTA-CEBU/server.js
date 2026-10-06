@@ -10,6 +10,7 @@ import { EMOTES, normalizeAppearance } from './src/appearance.js';
 import { iceServers, rateLimited, sameOrigin as turnSameOrigin } from './api/_turn.js';
 import pgDriver from 'pg';
 import { registerPlayer, loginPlayer, playerForToken, logoutPlayer, sqlRpc } from './api/_accounts.js';
+import { wardrobeForToken, saveWardrobe } from './api/_cosmetics.js';
 import { sanitizeRoomName, clampNpcCount, publicRoom, roomSummary, startBlocker, assignRoles, roomMode, ffaLoadout, ffaDuration, ffaMap, joinableRoom, listableRoom, ROOM_MAX_PLAYERS, ROOM_IDLE_MS } from './api/_rooms.js';
 import { createRound, applyKill, openMeeting, castVote, advanceMeeting, resolveVote, publicRound, checkWin } from './api/_rounds.js';
 import {createFfaRound,publicFfa,ffaShot,ffaMelee,ffaReload,ffaSwitch,advanceFfa,ffaSetPrimary,ffaSetOnline,ffaJoinRound,ffaClaimDrop,ffaSnapshotPlan,FFA_WEAPONS} from './api/_ffa.js';
@@ -211,7 +212,7 @@ async function api(req,res,url){
   const body=req.method==='POST'?await readBody(req,url.pathname==='/api/voice'?VOICE_BODY:MAX_BODY):{};
   // --- player accounts ----------------------------------------------------
   if(url.pathname==='/api/register'||url.pathname==='/api/login'||
-     url.pathname==='/api/logout'||url.pathname==='/api/me'){
+     url.pathname==='/api/logout'||url.pathname==='/api/me'||url.pathname==='/api/appearance'){
     if(!pool){accountsOff(res);return;}
     const agent=req.headers['user-agent']||'';
     try{
@@ -233,6 +234,16 @@ async function api(req,res,url){
         const player=await playerForToken(dbRpc,url.searchParams.get('token'));
         if(!player){send(res,401,{error:'Not signed in'});return;}
         send(res,200,{player});return;
+      }
+      if(req.method==='GET'&&url.pathname==='/api/appearance'){
+        const wardrobe=await wardrobeForToken(dbRpc,url.searchParams.get('token'));
+        if(!wardrobe){send(res,401,{error:'Not signed in'});return;}
+        send(res,200,{wardrobe});return;
+      }
+      if(req.method==='POST'&&url.pathname==='/api/appearance'){
+        const wardrobe=await saveWardrobe(dbRpc,{token:body.token,character:body.character,appearance:body.appearance});
+        if(!wardrobe){send(res,401,{error:'Not signed in'});return;}
+        send(res,200,{wardrobe});return;
       }
     }catch(error){
       // Never leak a driver message to the browser; it can carry SQL.

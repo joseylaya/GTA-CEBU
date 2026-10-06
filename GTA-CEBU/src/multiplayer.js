@@ -189,7 +189,14 @@ export function createMultiplayer({scene,avatar,getAccountToken,applyAppearance,
       fresh.visible=playerNamesVisible;peer.nameTag=fresh;peer.root.add(fresh);
     }
     peer.ghost=data.ghost===true;
-    const nextTarget=new THREE.Vector3(clamp(Number(data.x)||0,-WORLD.halfX+1,WORLD.halfX-1),clamp(Number(data.y)||0,0,110),clamp(Number(data.z)||0,-WORLD.halfZ+1,WORLD.halfZ-1));
+    const nextFlight=['jetpack','jet','helicopter'].includes(data.flight)?data.flight:null;
+    const nextAnimation=['Idle','Walk','Run','Jump','Punch'].includes(data.animation)?data.animation:'Idle';
+    // Ground players occasionally arrived with a stale fractional Y velocity.
+    // Extrapolating that sample made them launch briefly, then sink halfway
+    // into the pavement when the next packet corrected it. Only airborne
+    // states may carry vertical position between snapshots.
+    const grounded=!nextFlight&&!data.inCar&&nextAnimation!=='Jump';
+    const nextTarget=new THREE.Vector3(clamp(Number(data.x)||0,-WORLD.halfX+1,WORLD.halfX-1),grounded?0:clamp(Number(data.y)||0,0,110),clamp(Number(data.z)||0,-WORLD.halfZ+1,WORLD.halfZ-1));
     const now=performance.now(),elapsed=Math.max(.05,Math.min(.6,(now-peer.lastStateAt)/1000));
     peer.previousTarget.copy(peer.target);peer.target.copy(nextTarget);
     peer.velocity.copy(peer.target).sub(peer.previousTarget).multiplyScalar(1/elapsed);
@@ -197,8 +204,8 @@ export function createMultiplayer({scene,avatar,getAccountToken,applyAppearance,
     if(horizontalSpeed>maxSpeed){const scale=maxSpeed/horizontalSpeed;peer.velocity.x*=scale;peer.velocity.z*=scale;}
     peer.velocity.y=clamp(peer.velocity.y,-35,35);peer.lastStateAt=now;
     peer.heading=Number.isFinite(data.h)?data.h:0;
-    peer.flight=['jetpack','jet','helicopter'].includes(data.flight)?data.flight:null;
-    peer.animation=['Idle','Walk','Run','Jump','Punch'].includes(data.animation)?data.animation:'Idle';
+    peer.flight=nextFlight;
+    peer.animation=nextAnimation;
     // Derived from the shared weapon table, never hand-listed: the literal this
     // replaced was missing magnum and arc, so a peer holding either was
     // sanitised to 'hands' and rendered empty-handed.
@@ -568,6 +575,8 @@ export function createMultiplayer({scene,avatar,getAccountToken,applyAppearance,
       peer.root.position.y=lingering?peer.target.y+.45*fallen:peer.root.position.y;
       const since=Math.min(.12,(performance.now()-peer.lastStateAt)/1000);
       scratch.copy(peer.target).addScaledVector(peer.velocity,since);
+      if(!peer.flight&&peer.animation!=='Jump')scratch.y=0;
+      else scratch.y=Math.max(0,scratch.y);
       // A respawn is a teleport, not a run. Smoothing across it drags the body
       // from where they died toward where they reappeared, so for a second or
       // two everyone else still sees them at the kill site -- and shoots at it.

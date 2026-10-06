@@ -82,6 +82,11 @@ const POLICE_GROUND_REACH=4,POLICE_AIR_RESPONSE_HEIGHT=8;
 let cheatBuffer='',cheatTime=0;
 const characterTemplates=new Map();
 const UNIVERSAL_CHARACTERS={Atlas:'Superhero_Male_FullBody',Nova:'Superhero_Female_FullBody'};
+const OUTFIT_FILES={
+  Atlas:{1:'Male_Peasant',2:'Male_Ranger'},
+  Nova:{1:'Female_Peasant',2:'Female_Ranger'}
+};
+const outfitTemplates=new Map();
 const PIRATE_CHARACTERS=['Henry','Anne','Mako','Captain_Barbarossa','Sharky',...Object.keys(UNIVERSAL_CHARACTERS)];
 const PLAYER_CHARACTERS=Object.keys(UNIVERSAL_CHARACTERS);
 let characterChoice='Atlas';
@@ -94,7 +99,7 @@ previewCamera.position.set(0,2.1,7.2);previewCamera.lookAt(0,1.8,0);previewScene
 previewScene.add(new THREE.HemisphereLight(0xe6ebff,0x17142d,2.7));
 const previewKey=new THREE.DirectionalLight(0xffd1bd,4.2);previewKey.position.set(-3,5,4);previewScene.add(previewKey);
 const previewRim=new THREE.DirectionalLight(0x746cff,5);previewRim.position.set(4,3,-3);previewScene.add(previewRim);
-let previewModel=null,previewMixer=null,previewCharacter=null,previewShowcaseUntil=0,previewRotation=.24,previewDragging=false,previewDragX=0;
+let previewModel=null,previewMixer=null,previewOutfitMixer=null,previewCharacter=null,previewOutfitTop=-1,previewShowcaseUntil=0,previewRotation=.24,previewDragging=false,previewDragX=0;
 const menuPreviewCanvas=$('menu-character-preview');
 const menuPreviewRenderer=new THREE.WebGLRenderer({canvas:menuPreviewCanvas,alpha:true,antialias:true,powerPreference:'low-power'});
 menuPreviewRenderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));menuPreviewRenderer.outputColorSpace=THREE.SRGBColorSpace;menuPreviewRenderer.toneMapping=THREE.ACESFilmicToneMapping;menuPreviewRenderer.toneMappingExposure=1.35;
@@ -124,16 +129,18 @@ function sizePiratePreview(){
 function playPreviewAnimation(name='Idle',once=false){
   const source=characterTemplates.get(previewCharacter),clip=source&&THREE.AnimationClip.findByName(source.animations,name);if(!clip||!previewMixer)return;
   previewMixer.stopAllAction();const action=previewMixer.clipAction(clip);action.reset().setLoop(once?THREE.LoopOnce:THREE.LoopRepeat,once?1:Infinity);action.clampWhenFinished=once;action.play();
+  if(previewOutfitMixer){previewOutfitMixer.stopAllAction();const outfitAction=previewOutfitMixer.clipAction(clip);outfitAction.reset().setLoop(once?THREE.LoopOnce:THREE.LoopRepeat,once?1:Infinity);outfitAction.clampWhenFinished=once;outfitAction.play();}
   if(once)previewMixer.addEventListener('finished',function returnToIdle(){previewMixer.removeEventListener('finished',returnToIdle);playPreviewAnimation('Idle');});
 }
 function showPiratePreview(name,celebrate=false){
   const source=characterTemplates.get(name);if(!source)return;
-  if(previewCharacter!==name){
-    if(previewModel)previewStage.remove(previewModel);previewMixer?.stopAllAction();
-    previewModel=cloneSkeleton(source.scene);const bounds=new THREE.Box3().setFromObject(previewModel),centre=bounds.getCenter(new THREE.Vector3()),height=Math.max(.1,bounds.max.y-bounds.min.y),scale=3.05/height;
-    previewModel.scale.setScalar(scale);previewModel.position.set(-centre.x*scale,-bounds.min.y*scale+.14,-centre.z*scale);previewModel.rotation.y=0;
-    previewModel.traverse(child=>{if(child.name?.startsWith('Weapon_'))child.visible=false;if(child.isMesh){child.castShadow=false;child.receiveShadow=false;}});
-    previewStage.add(previewModel);previewMixer=new THREE.AnimationMixer(previewModel);previewCharacter=name;
+  if(previewCharacter!==name||previewOutfitTop!==appearance.top){
+    if(previewModel)previewStage.remove(previewModel);previewMixer?.stopAllAction();previewOutfitMixer?.stopAllAction();
+    previewModel=new THREE.Group();const base=cloneSkeleton(source.scene),bounds=new THREE.Box3().setFromObject(base),centre=bounds.getCenter(new THREE.Vector3()),height=Math.max(.1,bounds.max.y-bounds.min.y),scale=3.25/height,outfitName=OUTFIT_FILES[name]?.[appearance.top],outfitSource=outfitName&&outfitTemplates.get(outfitName);showOnlyVisualHead(base,Boolean(outfitSource));
+    base.scale.setScalar(scale);base.position.set(-centre.x*scale,-bounds.min.y*scale+.14,-centre.z*scale);base.traverse(child=>{if(child.name?.startsWith('Weapon_'))child.visible=false;if(child.isMesh){child.castShadow=false;child.receiveShadow=false;}});previewModel.add(base);
+    previewOutfitMixer=null;
+    if(outfitSource){const outfit=cloneSkeleton(outfitSource.scene),outfitBounds=new THREE.Box3().setFromObject(outfit),outfitCentre=outfitBounds.getCenter(new THREE.Vector3()),outfitHeight=Math.max(.1,outfitBounds.max.y-outfitBounds.min.y),outfitScale=3.25/outfitHeight;outfit.scale.setScalar(outfitScale);outfit.position.set(-outfitCentre.x*outfitScale,-outfitBounds.min.y*outfitScale+.14,-outfitCentre.z*outfitScale);outfit.traverse(child=>{if(child.isMesh){child.castShadow=false;child.receiveShadow=false;}});previewModel.add(outfit);previewOutfitMixer=new THREE.AnimationMixer(outfit);}
+    previewModel.rotation.y=0;previewStage.add(previewModel);previewMixer=new THREE.AnimationMixer(base);previewCharacter=name;previewOutfitTop=appearance.top;
   }
   if(celebrate){previewShowcaseUntil=performance.now()+2600;playPreviewAnimation('Wave',true);}
   else if(performance.now()>=previewShowcaseUntil)playPreviewAnimation('Idle');
@@ -664,12 +671,76 @@ function avatar(color=mats.shirt,policeLook=false,look=null){
   return g;
 }
 function applyAppearance(mesh,look){
-  const chosen=normalizeAppearance(look),parts=mesh.userData;
+  const chosen=normalizeAppearance(look),parts=mesh.userData;parts.appearance=chosen;
   parts.head.material=clothingMaterials.skin[chosen.skin];parts.hair.material=clothingMaterials.hair[chosen.hair];parts.torso.material=clothingMaterials.shirt[chosen.shirt];
   parts.hood.material=clothingMaterials.shirt[chosen.shirt];parts.hood.visible=chosen.top===1;parts.jacketTrim.forEach(item=>item.visible=chosen.top===2);
   parts.hair.scale.y=chosen.haircut===1 ? .42 : .18;parts.hair.position.y=chosen.haircut===1 ? 3.58 : 3.47;
   parts.capBill.material=clothingMaterials.hair[chosen.hair];parts.capBill.visible=chosen.haircut===2;
   parts.armMeshes.forEach(arm=>arm.material=clothingMaterials.skin[chosen.skin]);parts.legMeshes.forEach(leg=>leg.material=clothingMaterials.pants[chosen.pants]);
+  // Universal avatars use authored textures rather than the fallback's
+  // separate boxes. Their hair is a distinct material and can be recoloured
+  // cleanly. The current superhero suit is one textured mesh, so apply only a
+  // gentle outfit tint until modular tops and bottoms are added next.
+  const visual=parts.characterVisual;
+  if(visual)visual.traverse(child=>{
+    if(!child.isMesh)return;
+    const materials=Array.isArray(child.material)?child.material:[child.material];
+    for(const item of materials){if(!item?.color)continue;const name=String(item.name||'');
+      if(/hair/i.test(name))item.color.setHex(APPEARANCE_OPTIONS.hair[chosen.hair][1]);
+      else if(/superhero/i.test(name))item.color.setHex(APPEARANCE_OPTIONS.shirt[chosen.shirt][1]).lerp(new THREE.Color(0xffffff),.62);
+    }
+  });
+  if(visual&&parts.universalVisual)attachCharacterOutfit(mesh,parts.characterName,chosen.top);
+}
+function buildCharacterActions(root,animations){
+  const mixer=new THREE.AnimationMixer(root),actions=new Map(animations.map(clip=>[clip.name,mixer.clipAction(clip)])),weaponActions=new Map();
+  const upperBody=/^(spine_0[1-3]|neck_01|Head|clavicle_|upperarm_|lowerarm_|hand_|index_|middle_|ring_|pinky_|thumb_)/i;
+  for(const clipName of ['PistolIdle','PistolShoot','PistolReload','SwordIdle','Sword']){
+    const clip=animations.find(item=>item.name===clipName);if(!clip)continue;
+    const upperClip=new THREE.AnimationClip(`${clipName}_Upper`,clip.duration,clip.tracks.filter(track=>upperBody.test(track.name)).map(track=>track.clone()));
+    weaponActions.set(clipName,mixer.clipAction(upperClip));
+  }
+  return {mixer,actions,weaponActions};
+}
+function headOnlyGeometry(source){
+  const geometry=source.clone();geometry.computeBoundingBox();
+  const position=geometry.getAttribute('position'),bounds=geometry.boundingBox;
+  if(!position||!bounds)return geometry;
+  // Keep only the authored head. A lower cut retains the superhero shoulders
+  // and chest, which then z-fight through sleeveless and open-neck outfits.
+  const cutoff=bounds.min.y+(bounds.max.y-bounds.min.y)*.87,index=geometry.getIndex();
+  if(index){
+    const kept=[];
+    for(let i=0;i<index.count;i+=3){const a=index.getX(i),b=index.getX(i+1),c=index.getX(i+2);if(Math.max(position.getY(a),position.getY(b),position.getY(c))>=cutoff)kept.push(a,b,c);}
+    geometry.setIndex(kept);geometry.clearGroups();geometry.addGroup(0,kept.length,0);
+  }
+  geometry.computeBoundingBox();geometry.computeBoundingSphere();return geometry;
+}
+function showOnlyVisualHead(visual,outfitted){
+  visual?.traverse(child=>{
+    // These bright eyebrow cards read as two floating white strokes once the
+    // modular hood is layered around the face.
+    if(/^eyebrows$/i.test(child.name||''))child.visible=!outfitted;
+    if(!child.isSkinnedMesh||!/superhero/i.test(child.name||''))return;
+    child.userData.fullBodyGeometry||=child.geometry;
+    child.userData.headGeometry||=headOnlyGeometry(child.geometry);
+    child.geometry=outfitted?child.userData.headGeometry:child.userData.fullBodyGeometry;
+  });
+}
+function showOnlyBaseHead(mesh,outfitted){showOnlyVisualHead(mesh.userData.characterVisual,outfitted);}
+function attachCharacterOutfit(mesh,name,top){
+  const outfitName=OUTFIT_FILES[name]?.[top]||null;
+  if(mesh.userData.outfitName===outfitName)return;
+  if(mesh.userData.outfitVisual){mesh.remove(mesh.userData.outfitVisual);mesh.userData.outfitMixer?.stopAllAction();}
+  mesh.userData.outfitVisual=null;mesh.userData.outfitMixer=null;mesh.userData.outfitActions=null;mesh.userData.outfitWeaponActions=null;mesh.userData.outfitCharacterAction=null;mesh.userData.outfitWeaponAction=null;mesh.userData.outfitName=outfitName;
+  const source=outfitName&&outfitTemplates.get(outfitName);showOnlyBaseHead(mesh,Boolean(source));if(!source)return;
+  const visual=cloneSkeleton(source.scene),bounds=new THREE.Box3().setFromObject(visual),height=Math.max(.1,bounds.max.y-bounds.min.y),scale=3.65/height;
+  visual.scale.setScalar(scale);visual.position.y=-bounds.min.y*scale;
+  visual.traverse(child=>{if(child.isMesh){child.material=Array.isArray(child.material)?child.material.map(item=>item.clone()):child.material?.clone();child.castShadow=true;child.receiveShadow=true;}});
+  mesh.add(visual);
+  const animationSet=characterTemplates.get(name)?.animations||[],rig=buildCharacterActions(visual,animationSet);
+  mesh.userData.outfitVisual=visual;mesh.userData.outfitMixer=rig.mixer;mesh.userData.outfitActions=rig.actions;mesh.userData.outfitWeaponActions=rig.weaponActions;
+  playCharacter(mesh,mesh.userData.characterAction||'Idle',0);
 }
 function attachCharacterModel(mesh,name){
   const source=characterTemplates.get(name);
@@ -681,21 +752,14 @@ function attachCharacterModel(mesh,name){
   }
   const originalMeshes=[];mesh.traverse(child=>{if(child.isMesh)originalMeshes.push(child);});
   const visual=cloneSkeleton(source.scene),bounds=new THREE.Box3().setFromObject(visual);
-  const height=Math.max(.1,bounds.max.y-bounds.min.y),scale=3.35/height;
+  const height=Math.max(.1,bounds.max.y-bounds.min.y),scale=3.65/height;
   visual.scale.setScalar(scale);visual.position.y=-bounds.min.y*scale;
-  visual.traverse(child=>{if(child.name?.startsWith('Weapon_'))child.visible=false;if(child.isMesh){child.castShadow=true;child.receiveShadow=true;}});
+  visual.traverse(child=>{if(child.name?.startsWith('Weapon_'))child.visible=false;if(child.isMesh){child.material=Array.isArray(child.material)?child.material.map(item=>item.clone()):child.material?.clone();child.castShadow=true;child.receiveShadow=true;}});
   mesh.add(visual);
   originalMeshes.forEach(part=>{if(!mesh.userData.gun?.getObjectById(part.id)&&!mesh.userData.deductionKnife?.getObjectById(part.id)&&!mesh.userData.jetpack?.getObjectById(part.id))part.visible=false;});
-  const mixer=new THREE.AnimationMixer(visual),actions=new Map(source.animations.map(clip=>[clip.name,mixer.clipAction(clip)])),weaponActions=new Map();
-  if(source.userData?.universal){
-    const upperBody=/^(spine_0[1-3]|neck_01|Head|clavicle_|upperarm_|lowerarm_|hand_|index_|middle_|ring_|pinky_|thumb_)/i;
-    for(const clipName of ['PistolIdle','PistolShoot','PistolReload','SwordIdle','Sword']){
-      const clip=source.animations.find(item=>item.name===clipName);if(!clip)continue;
-      const upperClip=new THREE.AnimationClip(`${clipName}_Upper`,clip.duration,clip.tracks.filter(track=>upperBody.test(track.name)).map(track=>track.clone()));
-      weaponActions.set(clipName,mixer.clipAction(upperClip));
-    }
-  }
+  const rig=buildCharacterActions(visual,source.animations),{mixer,actions,weaponActions}=rig;
   mesh.userData.characterVisual=visual;mesh.userData.characterMixer=mixer;mesh.userData.characterActions=actions;mesh.userData.weaponActions=weaponActions;mesh.userData.characterName=name;mesh.userData.universalVisual=source.userData?.universal===true;
+  applyAppearance(mesh,mesh.userData.appearance||appearance);
   // The fallback avatar's shoulder used to remain the weapon parent after the
   // imported pirate replaced it. That invisible arm has different proportions,
   // leaving the gun floating beside the real hand. Keep the gun on the avatar
@@ -717,26 +781,33 @@ function attachCharacterModel(mesh,name){
 }
 function playCharacter(mesh,name,fade=.16){
   const data=mesh.userData,action=data.characterActions?.get(name);
-  if(!action||data.characterAction===name)return;
+  if(!action||(data.characterAction===name&&data.outfitCharacterAction===name))return;
   const previous=data.characterActions.get(data.characterAction);
   if(previous)previous.fadeOut(fade);
   action.reset().setEffectiveWeight(1).fadeIn(fade).play();
   action.setLoop(['Punch','HitReact','Jump','Death'].includes(name)?THREE.LoopOnce:THREE.LoopRepeat,Infinity);
   action.clampWhenFinished=true;data.characterAction=name;
+  const outfitAction=data.outfitActions?.get(name),outfitPrevious=data.outfitActions?.get(data.outfitCharacterAction);
+  if(outfitPrevious)outfitPrevious.fadeOut(fade);
+  if(outfitAction){outfitAction.reset().setEffectiveWeight(1).fadeIn(fade).play();outfitAction.setLoop(['Punch','HitReact','Jump','Death'].includes(name)?THREE.LoopOnce:THREE.LoopRepeat,Infinity);outfitAction.clampWhenFinished=true;data.outfitCharacterAction=name;}
 }
 function playWeaponCharacter(mesh,state){
   const data=mesh.userData,actions=data.weaponActions;if(!actions?.size)return;
   const armed=state.weapon==='pistol'||Boolean(GUN_MODELS[state.weapon]);
   const name=state.weapon==='knife'?(state.attacking?'Sword':'SwordIdle'):
     !armed?null:state.reloading?'PistolReload':state.attacking?'PistolShoot':'PistolIdle';
-  if(data.weaponAction===name)return;
+  if(data.weaponAction===name&&data.outfitWeaponAction===name)return;
   const previous=actions.get(data.weaponAction);if(previous)previous.fadeOut(.1);
   data.weaponAction=name;if(!name)return;
   const action=actions.get(name);if(!action)return;
   // This is an upper-body layer over a full-weight locomotion clip. A stronger
   // weight prevents the base idle/run pose from averaging the hands back down.
   action.reset().setEffectiveWeight(6).fadeIn(.1).play();action.setLoop(['PistolIdle','SwordIdle'].includes(name)?THREE.LoopRepeat:THREE.LoopOnce,Infinity);action.clampWhenFinished=true;
+  const outfitPrevious=data.outfitWeaponActions?.get(data.outfitWeaponAction);if(outfitPrevious)outfitPrevious.fadeOut(.1);
+  data.outfitWeaponAction=name;const outfitAction=data.outfitWeaponActions?.get(name);
+  if(outfitAction){outfitAction.reset().setEffectiveWeight(6).fadeIn(.1).play();outfitAction.setLoop(['PistolIdle','SwordIdle'].includes(name)?THREE.LoopRepeat:THREE.LoopOnce,Infinity);outfitAction.clampWhenFinished=true;}
 }
+function updateCharacterMixer(mesh,dt){mesh.userData.characterMixer?.update(dt);mesh.userData.outfitMixer?.update(dt);}
 const firearmBoneOrigin=new THREE.Vector3(),firearmBoneDirection=new THREE.Vector3(),firearmTarget=new THREE.Vector3();
 const firearmRightGrip=new THREE.Vector3(),firearmLeftGrip=new THREE.Vector3(),firearmMount=new THREE.Vector3();
 const firearmParentQuaternion=new THREE.Quaternion(),firearmWorldQuaternion=new THREE.Quaternion(),firearmYAxis=new THREE.Vector3(0,1,0);
@@ -856,7 +927,7 @@ function animateRemoteCharacter(mesh,state,dt){
   const data=mesh.userData;
   if(data.characterMixer){
     playCharacter(mesh,state.weapon==='knife'&&state.attacking?'Sword':state.animation);
-    data.characterMixer.update(dt);
+    updateCharacterMixer(mesh,dt);
     // The pirate kit has no firearm animation. Pose its right shoulder after
     // the mixer so aiming remains visible without replacing the walk cycle.
     // Add a two-handed firearm pose after the locomotion mixer. This preserves
@@ -1194,6 +1265,7 @@ const loadPirate=async name=>{
   resolve(true);
 },undefined,error=>{console.warn(`Character ${name} unavailable; using built-in character.`,error);resolve(false);}));
 };
+const loadOutfit=async outfitName=>new Promise(resolve=>characterLoader.load(`/models/universal/outfits/${outfitName}.gltf`,gltf=>{outfitTemplates.set(outfitName,gltf);resolve(true);},undefined,error=>{console.warn(`Outfit ${outfitName} unavailable.`,error);resolve(false);}));
 const womenNames=['Female_Casual','Female_Dress','Female_Alternative','Female_TankTop'];
 const womenTemplates=new Map(),womenLoader=new FBXLoader();
 function attachWomanModel(mesh,name){
@@ -2130,13 +2202,13 @@ function updateDeduction(dt,t){
     player.vx=dt?gx/dt:0;player.vz=dt?gz/dt:0;player.vy=0;
     player.mesh.position.set(player.x,player.y,player.z);
     if(mag){player.h=Math.atan2(gx,gz);player.mesh.rotation.y=player.h;}
-    if(player.mesh.userData.characterMixer){playCharacter(player.mesh,'Idle');player.mesh.userData.characterMixer.update(dt);}
+    if(player.mesh.userData.characterMixer){playCharacter(player.mesh,'Idle');updateCharacterMixer(player.mesh,dt);}
   }else{
   const speed=down('sprint')?12:8;
   const dx=mag?(-Math.sin(camYaw)*f+Math.cos(camYaw)*r)/mag*speed*dt:0,dz=mag?(-Math.cos(camYaw)*f-Math.sin(camYaw)*r)/mag*speed*dt:0;
   consumeQueuedJump(now);const fallingVy=player.vy;
   moveWithCollision(player,dx,dz,1.05);player.vy=Math.max(-30,player.vy-32*dt);player.y=Math.max(0,player.y+player.vy*dt);player.grounded=player.y<=.001&&player.vy<=0;if(player.grounded){player.y=0;player.vy=0;player.lastGroundedAt=performance.now();}player.vx=dt?dx/dt:0;player.vz=dt?dz/dt:0;
-  trackLanding(fallingVy);trackFootsteps(dt,player.grounded);player.mesh.position.set(player.x,player.y,player.z);if(mag){player.h=Math.atan2(dx,dz);player.mesh.rotation.y=player.h;}if(player.mesh.userData.characterMixer){playCharacter(player.mesh,!player.grounded?'Jump':mag?'Run':'Idle');player.mesh.userData.characterMixer.update(dt);}
+  trackLanding(fallingVy);trackFootsteps(dt,player.grounded);player.mesh.position.set(player.x,player.y,player.z);if(mag){player.h=Math.atan2(dx,dz);player.mesh.rotation.y=player.h;}if(player.mesh.userData.characterMixer){playCharacter(player.mesh,!player.grounded?'Jump':mag?'Run':'Idle');updateCharacterMixer(player.mesh,dt);}
   }
   // Every client simulates its room's NPCs from the same seeded starting state.
   // The host may still publish snapshots as a soft correction, but movement no
@@ -2172,7 +2244,7 @@ function updateDeduction(dt,t){
       const dwell=target.kind==='task'||target.kind==='fake-task'?4500:1500;
       if(now>bot.arrivedAt+dwell||now>bot.moveAt){bot.target=null;bot.arrivedAt=0;}
     }
-    bot.mesh.userData.characterMixer?.update(dt);
+    if(bot.mesh.userData.characterMixer)updateCharacterMixer(bot.mesh,dt);
   }
   // A finished site stops advertising itself.
   for(const task of deduction.tasks){
@@ -2268,6 +2340,7 @@ for(const [part,choices] of [...Object.entries(STYLE_OPTIONS).map(([key,values])
     appearance=normalizeAppearance({...appearance,[part]:Number(select.value)});
     try{localStorage.setItem('districtZeroAppearance',JSON.stringify(appearance));}catch{}
     if(player)applyAppearance(player.mesh,appearance);
+    scheduleWardrobeSave();
     drawStylePreview();
   });
   label.append(select);$('appearance-options').append(label);
@@ -2279,6 +2352,7 @@ $('character-choice').addEventListener('change',()=>{
   try{localStorage.setItem('districtZeroCharacter',characterChoice);}catch{}
   if(player){player.character=characterChoice;attachCharacterModel(player.mesh,characterChoice);}
   multiplayer.refreshCharacters?.();
+  scheduleWardrobeSave();
   toast(`Character selected · ${characterChoice.replaceAll('_',' ')}`);
 });
 $('meeting-toggle').onclick=()=>toggleMeetingPanel();
@@ -2684,7 +2758,7 @@ function updatePlayer(dt,t){
   if(player.mesh.userData.characterMixer){
     const pace=Math.hypot(player.vx,player.vz);
     const state=player.inCar||player.inAircraft||player.jetpack&&player.y>.15?'Idle':!player.grounded?'Jump':performance.now()<player.attackUntil&&player.weapon==='fists'?'Punch':pace>11?'Run':pace>.8?'Walk':'Idle';
-    playCharacter(player.mesh,state);player.mesh.userData.characterMixer.update(dt);
+    playCharacter(player.mesh,state);updateCharacterMixer(player.mesh,dt);
     const characterState={weapon:player.weapon,pitch:camPitch,aiming,reloading:Boolean(player.reloadingUntil),attacking:performance.now()<player.attackUntil,switchingUntil:player.weaponSwitchUntil};
     poseCharacterFirearm(player.mesh,characterState);poseCharacterKnife(player.mesh,characterState);
   }
@@ -2747,7 +2821,7 @@ function updatePeds(dt,t){
   p.mesh.position.set(p.x,hurt?-.15*Math.sin(phase*Math.PI):0,p.z);
   // Skinned animation is the costliest per-pedestrian work; skip it for anyone
   // too far away to read, and for anyone the camera cannot see at all.
-  if(p.nearby&&p.mesh.visible&&p.mesh.userData.characterMixer){playCharacter(p.mesh,hurt&& !p.mesh.userData.womanVisual?'HitReact':p.wait>0?'Idle':target?p.panic>0?'Run':'Walk':'Idle');p.mesh.userData.characterMixer.update(dt);}
+  if(p.nearby&&p.mesh.visible&&p.mesh.userData.characterMixer){playCharacter(p.mesh,hurt&& !p.mesh.userData.womanVisual?'HitReact':p.wait>0?'Idle':target?p.panic>0?'Run':'Walk':'Idle');updateCharacterMixer(p.mesh,dt);}
 }}
 function updatePoliceHelicopter(dt,subject){
   const airborne=wanted.heat>0&&!player.inCar&&subject.y>=POLICE_AIR_RESPONSE_HEIGHT;
@@ -4496,6 +4570,7 @@ $('lobby-character-grid').addEventListener('click',event=>{
   if(player){player.character=characterChoice;attachCharacterModel(player.mesh,characterChoice);}
   showPiratePreview(characterChoice,true);
   multiplayer.refreshCharacters?.();
+  scheduleWardrobeSave();
   multiplayer.roomAction('character',{character:characterChoice}).catch(error=>toast(error.message));
 });
 $('lobby-npc').addEventListener('input',event=>{
@@ -4634,7 +4709,7 @@ function frame(now){requestAnimationFrame(frame);const frameMs=now-last,dt=Math.
   updateBloodPools(now);
   for(let i=fallenBodies.length-1;i>=0;i--){
     const body=fallenBodies[i],progress=clamp((now-body.born)/(body.until-body.born),0,1);
-    if(body.mesh.userData.characterMixer)body.mesh.userData.characterMixer.update(dt);
+    if(body.mesh.userData.characterMixer)updateCharacterMixer(body.mesh,dt);
     else body.mesh.rotation.x=progress*1.35;
     body.mesh.position.y=-progress*.6;
     if(progress>=1){scene.remove(body.mesh);fallenBodies.splice(i,1);}
@@ -4649,7 +4724,7 @@ function frame(now){requestAnimationFrame(frame);const frameMs=now-last,dt=Math.
   if(playing)updateCamera(dt);else{camera.position.set(-170,210,300);camera.lookAt(0,20,-50);}
   renderer.render(scene,camera);
   if(!$('overlay').hidden&&!lobbyVisible()){mountMenuSharky();sizeMenuPreview();menuPreviewMixer?.update(dt);if(menuPreviewModel)menuPreviewStage.rotation.y=menuPreviewRotation+(menuPreviewDragging?0:Math.sin(elapsed*.55)*.08);menuPreviewRenderer.render(menuPreviewScene,menuPreviewCamera);}
-  if(lobbyVisible()&&lobbyRoom){sizePiratePreview();previewMixer?.update(dt);if(previewModel)previewStage.rotation.y=previewRotation+(previewDragging?0:Math.sin(elapsed*.65)*.1);previewRenderer.render(previewScene,previewCamera);}
+  if(lobbyVisible()&&lobbyRoom){sizePiratePreview();previewMixer?.update(dt);previewOutfitMixer?.update(dt);if(previewModel)previewStage.rotation.y=previewRotation+(previewDragging?0:Math.sin(elapsed*.65)*.1);previewRenderer.render(previewScene,previewCamera);}
 }
 requestAnimationFrame(frame);
 
@@ -4692,7 +4767,7 @@ async function boot(){
   const audioFiles=['fire-pistol.ogg','fire-smg.ogg','fire-rifle.ogg','fire-shotgun.ogg','melee-knife.ogg','melee-knife-2.ogg','hit.ogg','headshot-victim.mp3','headshot-killer.mp3','firstblood.mp3','double-kill.mp3','triple-kill.mp3','rampage.mp3','kill.ogg','death.ogg','footstep.ogg'];
   const steps=[
     ['CEBU CITY',  ()=>worldAssetsReady],
-    ['CHARACTERS', ()=>Promise.all([...PIRATE_CHARACTERS].map(loadPirate))],
+    ['CHARACTERS', async()=>{await Promise.all([...new Set(Object.values(OUTFIT_FILES).flatMap(Object.values))].map(loadOutfit));await Promise.all([...PIRATE_CHARACTERS].map(loadPirate));}],
     ['CROWD',      ()=>Promise.all(womenNames.map(loadWoman))],
     ['WEAPONS',    ()=>Promise.all(Object.keys(GUN_MODELS).map(loadGunModel))],
     ['GAME MODES', ()=>deductionAssetsReady],
@@ -4740,6 +4815,39 @@ const ACCOUNT_BASE=(()=>{
 })();
 const accountToken=()=>{try{return localStorage.getItem(ACCOUNT_TOKEN_KEY)||'';}catch{return '';}};
 const rememberAccount=value=>{try{value?localStorage.setItem(ACCOUNT_TOKEN_KEY,value):localStorage.removeItem(ACCOUNT_TOKEN_KEY);}catch{}};
+let ownedCosmetics=[],wardrobeSaveTimer=null,applyingWardrobe=false;
+const LOCAL_WARDROBE=location.hostname==='localhost'||location.hostname==='127.0.0.1';
+const localWardrobeKey=()=>`districtZeroWardrobe:${account?.id||account?.name||'player'}`;
+function applyAccountWardrobe(wardrobe){
+  if(!wardrobe)return;applyingWardrobe=true;
+  ownedCosmetics=Array.isArray(wardrobe.owned)?wardrobe.owned:[];
+  appearance=normalizeAppearance(wardrobe.appearance);
+  characterChoice=PLAYER_CHARACTERS.includes(wardrobe.character)?wardrobe.character:'Atlas';
+  try{localStorage.setItem('districtZeroAppearance',JSON.stringify(appearance));localStorage.setItem('districtZeroCharacter',characterChoice);}catch{}
+  const characterSelect=$('character-choice');if(characterSelect)characterSelect.value=characterChoice;
+  for(const [part,value] of Object.entries(appearance)){const select=$(`appearance-${part}`);if(select)select.value=String(value);}
+  drawStylePreview();
+  if(player){player.character=characterChoice;attachCharacterModel(player.mesh,characterChoice);applyAppearance(player.mesh,appearance);}
+  multiplayer.refreshCharacters?.();applyingWardrobe=false;
+}
+async function loadAccountWardrobe(){
+  const token=accountToken();if(!account||!token)return;
+  if(LOCAL_WARDROBE){try{const saved=JSON.parse(localStorage.getItem(localWardrobeKey())||'null');if(saved)applyAccountWardrobe(saved);}catch{}return;}
+  try{const response=await fetch(`${ACCOUNT_BASE}/api/appearance?token=${encodeURIComponent(token)}`,{cache:'no-store'});if(response.ok)applyAccountWardrobe((await response.json()).wardrobe);}catch{}
+}
+function scheduleWardrobeSave(){
+  if(applyingWardrobe||!account||!accountToken())return;
+  clearTimeout(wardrobeSaveTimer);wardrobeSaveTimer=setTimeout(async()=>{
+    if(LOCAL_WARDROBE){
+      try{localStorage.setItem(localWardrobeKey(),JSON.stringify({character:characterChoice,appearance,owned:ownedCosmetics}));toast('Outfit saved to this account locally');}catch{}
+      return;
+    }
+    try{
+      const data=await accountRequest('/api/appearance',{token:accountToken(),character:characterChoice,appearance});
+      applyAccountWardrobe(data.wardrobe);toast('Outfit saved to your account');
+    }catch(error){toast(error.message||'Could not save outfit');}
+  },350);
+}
 
 function renderAccount(){
   const out=$('account-out'),inside=$('account-in'),nameInput=$('player-name');
@@ -4776,7 +4884,7 @@ async function restoreAccount(){
   const token=accountToken();if(!token){renderAccount();return;}
   try{
     const response=await fetch(`${ACCOUNT_BASE}/api/me?token=${encodeURIComponent(token)}`);
-    if(response.ok){account=(await response.json()).player;}
+    if(response.ok){account=(await response.json()).player;await loadAccountWardrobe();}
     else if(response.status===401)rememberAccount('');   // expired or revoked
   }catch{ /* offline: stay signed out rather than block the menu */ }
   renderAccount();
@@ -4867,7 +4975,7 @@ $('account-form')?.addEventListener('submit',async event=>{
     const payload={name:$('account-field-name').value.trim(),password:$('account-field-password').value};
     if(accountMode==='register')payload.email=$('account-field-email').value.trim();
     const data=await accountRequest(accountMode==='register'?'/api/register':'/api/login',payload);
-    account=data.player;rememberAccount(data.token);
+    account=data.player;rememberAccount(data.token);await loadAccountWardrobe();
     renderAccount();closeAccount();
     toast(accountMode==='register'?`Welcome, ${account.name}`:`Signed in as ${account.name}`);
   }catch(error){
