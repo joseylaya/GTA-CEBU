@@ -2332,7 +2332,7 @@ function drawStylePreview(){
   c.fillStyle='#243039';c.fillRect(51,43,4,4);c.fillRect(65,43,4,4);c.fillRect(55,53,10,2);
 }
 for(const [part,choices] of [...Object.entries(STYLE_OPTIONS).map(([key,values])=>[key,values.map(value=>[value])]),...Object.entries(APPEARANCE_OPTIONS)]){
-  const label=document.createElement('label');label.textContent=part.toUpperCase();
+  const label=document.createElement('label');label.textContent=part==='top'?'OUTFIT':part.toUpperCase();
   const select=document.createElement('select');select.id=`appearance-${part}`;
   choices.forEach(([name],index)=>{const option=document.createElement('option');option.value=index;option.textContent=name;select.append(option);});
   select.value=appearance[part];
@@ -2356,7 +2356,14 @@ $('character-choice').addEventListener('change',()=>{
   toast(`Character selected · ${characterChoice.replaceAll('_',' ')}`);
 });
 $('meeting-toggle').onclick=()=>toggleMeetingPanel();
-$('customizeBtn').onclick=()=>{$('district-map-panel').hidden=true;$('customize-panel').hidden=!$('customize-panel').hidden;};
+function openLocker(){
+  if(!account){openAccount('login');toast('Sign in to customize your character');return;}
+  $('district-map-panel').hidden=true;$('settings-panel').hidden=true;$('customize-panel').hidden=false;
+}
+$('customizeBtn').onclick=openLocker;
+$('nav-customize')?.addEventListener('click',openLocker);
+document.querySelectorAll('.locker-open').forEach(button=>button.addEventListener('click',openLocker));
+$('customize-close')?.addEventListener('click',()=>{$('customize-panel').hidden=true;});
 const bindingNames={forward:'Move forward',back:'Move back',left:'Move left',right:'Move right',sprint:'Sprint',jump:'Jump / handbrake',interact:'Interact',reload:'Reload',fists:'Equip fists',pistol:'Equip pistol',switchWeapon:'Switch weapon',chat:'Open chat'};
 let waitingForBinding=null;
 function down(action){return keys.has(settings.bindings[action])||(action==='sprint'&&settings.bindings.sprint==='ShiftLeft'&&keys.has('ShiftRight'));}
