@@ -750,9 +750,10 @@ function headOnlyGeometry(source){
 }
 function showOnlyVisualHead(visual,outfitted){
   visual?.traverse(child=>{
-    // These bright eyebrow cards read as two floating white strokes once the
-    // modular hood is layered around the face.
-    if(/^eyebrows$/i.test(child.name||''))child.visible=!outfitted;
+    // This export's eyebrow cards have a broken transparent material and read
+    // as two floating white sticks. Keep them hidden for every outfit,
+    // including the base Cadet model.
+    if(/^eyebrows$/i.test(child.name||''))child.visible=false;
     if(!child.isSkinnedMesh||!/superhero/i.test(child.name||''))return;
     child.userData.fullBodyGeometry||=child.geometry;
     child.userData.headGeometry||=headOnlyGeometry(child.geometry);
